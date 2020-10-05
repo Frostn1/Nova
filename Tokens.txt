@@ -1,0 +1,8 @@
+Official Tokens Eclipse Coding lang
+-----------------------------------
+
+type - Print the following string with no new line
+typeln - Print the following string with a new line
+var - Implements a creation of a new variable
+origin - Returns the origin of the var(int,float,string,etc...)
+
