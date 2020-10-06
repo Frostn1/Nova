@@ -1,1 +1,2 @@
-type("hello")
+type("Hello""There")
+type("Sean")

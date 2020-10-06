@@ -34,9 +34,16 @@ class Lexer:
             "var",
             "get("
         ]
-        self.tokens = []
+        self.tokens = [[]]
         self.varss = {}
-    
+    def run(self):
+        for line in self.text:
+            self.tokens.append([]) 
+            print(self.tokens)
+            for letter in line:
+                self.advance()
+                self.check_toke()
+
     def advance(self):
         self.counter += 1
         if self.line_counter < len(self.text)-1:
@@ -52,18 +59,24 @@ class Lexer:
             if self.counter < len(self.text[self.line_counter]):
                 self.current_letter = self.text[self.line_counter][self.counter]
                 self.toke += self.current_letter
+
     def check_toke(self):
+        # print(self.tokens)
+        # print(self.line_counter)
         for toke in self.key_words:
             if self.toke == toke:
-                self.tokens.append(self.toke)
+                self.tokens[self.line_counter-1].append(self.toke)
                 self.toke = ""
                 return self.tokens
+        if self.toke == " ":
+            self.toke = ""
+            return self.tokens
         if self.toke in self.varss:
-            self.tokens.append("VAR;"+self.toke)
+            self.tokens[self.line_counter-1].append("VAR;"+self.toke)
             self.toke = ""
             return self.tokens
         if self.toke[0] == '"' and self.toke[len(self.toke)-1] == '"' and len(self.toke) > 1:
-            self.tokens.append("STR;"+self.toke.replace('"',""))
+            self.tokens[self.line_counter-1].append("STR;"+self.toke.replace('"',""))
             self.toke = ""
             return self.tokens
         return self.tokens
@@ -90,13 +103,9 @@ def read_file(file_t):
 def lex(text):
     lexer_t = Lexer(text)
     # print(len(text))
-    tokes = []
-    for x in text:
-        for y in x:
-            # print(lexer_t.toke)
-            lexer_t.advance()
-            tokes = lexer_t.check_toke()
-    print(tokes)
+    
+    lexer_t.run()
+    print(lexer_t.tokens)
 
     
             
@@ -105,6 +114,7 @@ def lex(text):
     # print(lexer_t.current_letter,lexer_t.toke)
     # print(text)
 def run(file_to_run):
+    
     check_file(file_to_run)
     lex(read_file(file_to_run))
     
