@@ -1,2 +1,4 @@
 type("Hello""There")
-type("Sean")
+type(1.2)
+var age = 16 + 2 + 3
+type(age)

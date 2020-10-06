@@ -1,4 +1,5 @@
 from sys import *
+import os
 ERROR_NAME = "Goblin"
 COMPILER_NAME = "Commander"
 class Var:
@@ -35,14 +36,21 @@ class Lexer:
             "get("
         ]
         self.tokens = [[]]
-        self.varss = {}
+        self.varss = {"age":15}
+    
     def run(self):
         for line in self.text:
-            self.tokens.append([]) 
-            print(self.tokens)
+            
+            # print(self.tokens)
+            # print(self.line_counter)
             for letter in line:
                 self.advance()
-                self.check_toke()
+                check = self.check_toke()
+                if check == "con":
+                    print("YHAHFDA",self.line_counter)
+                    break
+            self.tokens.append([]) 
+           
 
     def advance(self):
         self.counter += 1
@@ -61,24 +69,66 @@ class Lexer:
                 self.toke += self.current_letter
 
     def check_toke(self):
-        # print(self.tokens)
-        # print(self.line_counter)
+        
         for toke in self.key_words:
             if self.toke == toke:
-                self.tokens[self.line_counter-1].append(self.toke)
+                # print(toke)
+                # print(self.line_counter)
+                self.tokens[len(self.tokens)-1].append(self.toke)
                 self.toke = ""
                 return self.tokens
         if self.toke == " ":
             self.toke = ""
             return self.tokens
         if self.toke in self.varss:
-            self.tokens[self.line_counter-1].append("VAR;"+self.toke)
+            self.tokens[len(self.tokens)-1].append("VAR;"+self.toke)
             self.toke = ""
             return self.tokens
         if self.toke[0] == '"' and self.toke[len(self.toke)-1] == '"' and len(self.toke) > 1:
-            self.tokens[self.line_counter-1].append("STR;"+self.toke.replace('"',""))
+            self.tokens[len(self.tokens)-1].append("STR;"+self.toke.replace('"',""))
             self.toke = ""
             return self.tokens
+        
+        if self.current_letter == "+" or self.counter == len(self.text[self.line_counter])-1 and self.toke[:-1].replace(".","").isnumeric():
+            if "." in self.toke:
+                self.tokens[len(self.tokens)-1].append("FLOAT;"+self.toke.replace(")",""))
+            else:
+                self.tokens[len(self.tokens)-1].append("INT;"+self.toke.replace(")",""))
+            return self.tokens
+        #Create a Var section
+        
+        try:
+            # print(self.tokens[self.line_counter][0],self.tokens[self.line_counter][0] == 'var')
+            
+            if self.tokens[self.line_counter][0] == "var":
+
+                var_t_name = self.text[self.line_counter][self.text[self.line_counter].index("var")+4:].split("=")[0][:-1]
+                var_t_carry = self.text[self.line_counter][self.text[self.line_counter].index("var")+4:].split("=")[1][1:]
+                toke_t = ""
+                #Name Checking:
+                if var_t_name in self.varss.keys():
+                    
+                    raise Exception (ERROR_NAME+" Error: Var name '"+var_t_name+"',Has been manufactored before and can not again")
+                    
+                for letter in var_t_carry:
+                    for key in self.varss.keys():
+                        if toke_t == key:
+                            self.tokens[len(self.tokens)-1].append("VAR;"+key)
+                            break
+                    if toke_t.isnumeric():
+                        pass   
+                    
+                    toke_t += letter
+                print(var_t_name)
+                print(var_t_carry)
+                # print(self.toke)
+                self.toke = ""
+                print("YESSS")
+                return "con"
+                
+        except:
+            
+            pass
         return self.tokens
         
         
@@ -88,8 +138,9 @@ def check_file(file_t):
     if file_ender == "eclip":
         pass
     else:
-        print(ERROR_NAME,"Error: Wrong file type given to the",COMPILER_NAME)
-        exit(0)
+        raise Exception (ERROR_NAME+" Error: Wrong file type given to the "+COMPILER_NAME)
+        # print(ERROR_NAME,"Error: Wrong file type given to the",COMPILER_NAME)
+        # exit(0)
 
 def read_file(file_t):
     with open(file_t) as file1:
