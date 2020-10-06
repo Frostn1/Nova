@@ -36,7 +36,7 @@ class Lexer:
             "get("
         ]
         self.tokens = [[]]
-        self.varss = {"age":15}
+        self.varss = {}
     
     def run(self):
         for line in self.text:
@@ -47,7 +47,7 @@ class Lexer:
                 self.advance()
                 check = self.check_toke()
                 if check == "con":
-                    print("YHAHFDA",self.line_counter)
+                    # print("YHAHFDA",self.line_counter)
                     break
             self.tokens.append([]) 
            
@@ -67,13 +67,17 @@ class Lexer:
             if self.counter < len(self.text[self.line_counter]):
                 self.current_letter = self.text[self.line_counter][self.counter]
                 self.toke += self.current_letter
-
+    def check_sign(self,toke):
+        self.sign_list = ["+","-","*","/","^","(",")"]
+        for sign in self.sign_list:
+            if sign == toke:
+                return sign
+        return False
     def check_toke(self):
         
         for toke in self.key_words:
             if self.toke == toke:
-                # print(toke)
-                # print(self.line_counter)
+                
                 self.tokens[len(self.tokens)-1].append(self.toke)
                 self.toke = ""
                 return self.tokens
@@ -95,8 +99,8 @@ class Lexer:
             else:
                 self.tokens[len(self.tokens)-1].append("INT;"+self.toke.replace(")",""))
             return self.tokens
+
         #Create a Var section
-        
         try:
             # print(self.tokens[self.line_counter][0],self.tokens[self.line_counter][0] == 'var')
             
@@ -105,25 +109,44 @@ class Lexer:
                 var_t_name = self.text[self.line_counter][self.text[self.line_counter].index("var")+4:].split("=")[0][:-1]
                 var_t_carry = self.text[self.line_counter][self.text[self.line_counter].index("var")+4:].split("=")[1][1:]
                 toke_t = ""
+                var_t_tokens = []
+                counter_t = 0
                 #Name Checking:
                 if var_t_name in self.varss.keys():
-                    
                     raise Exception (ERROR_NAME+" Error: Var name '"+var_t_name+"',Has been manufactored before and can not again")
-                    
+                # print("Carry",var_t_carry)
                 for letter in var_t_carry:
+                    
+                    # print(toke_t)
+                    if toke_t == " ":
+                        toke_t = ""
                     for key in self.varss.keys():
                         if toke_t == key:
-                            self.tokens[len(self.tokens)-1].append("VAR;"+key)
+                            var_t_tokens.append("VAR;"+self.varss[key])
+                            toke_t = ""
                             break
-                    if toke_t.isnumeric():
-                        pass   
                     
+                    if toke_t.isnumeric() and not var_t_carry[counter_t].isnumeric():
+                       
+                        # print(var_t_carry[counter_t+1],"YES",toke_t)
+                        
+                        var_t_tokens.append("INT;"+toke_t)
+                        toke_t = ""
+                    elif self.check_sign(toke_t):
+                        var_t_tokens.append(self.check_sign(toke_t))
+                        toke_t = ""
                     toke_t += letter
-                print(var_t_name)
-                print(var_t_carry)
+                    counter_t += 1 
+                    
+                    
+                    # print("__"+toke_t+"__")
+                print("BLA",var_t_tokens)
+                # print("YES")
+                # print(var_t_name)
+                # print(var_t_carry)
                 # print(self.toke)
                 self.toke = ""
-                print("YESSS")
+                # print("YESSS")
                 return "con"
                 
         except:
