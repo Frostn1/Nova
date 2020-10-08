@@ -1,4 +1,0 @@
-type("Hello""There")
-type(1.2)
-var age = 16 + 2 + 3 * 1556
-type(age)

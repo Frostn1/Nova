@@ -40,16 +40,20 @@ class Lexer:
         self.varss = {}
     
     def run(self):
-        for line in self.text:
-            
-            
+        check = ""
+        for line in self.text:  
             for letter in line:
                 self.advance()
                 check = self.check_toke()
                 if check == "con":
-                    
+                    self.toke = ""
+                    self.line_counter += 1
+                    self.counter = -1
                     break
+                
+            check = ""
             self.tokens.append([]) 
+        
            
 
     def advance(self):
@@ -67,6 +71,7 @@ class Lexer:
             if self.counter < len(self.text[self.line_counter]):
                 self.current_letter = self.text[self.line_counter][self.counter]
                 self.toke += self.current_letter
+
     def check_sign(self,toke):
         self.sign_list = ["+","-","*","/","^","(",")"]
         for sign in self.sign_list:
@@ -75,31 +80,44 @@ class Lexer:
         return False
 
     def check_toke(self):
-
-        for toke in self.key_words:
         
+        for toke in self.key_words:
             if self.toke == toke:
-                print(toke,self.line_counter)
                 self.tokens[len(self.tokens)-1].append(self.toke)
                 self.toke = ""
                 return self.tokens
+
         if self.toke == " ":
             self.toke = ""
             return self.tokens
+            
         if self.toke in self.varss.keys():
             self.tokens[len(self.tokens)-1].append("VAR;"+self.toke)
             self.toke = ""
             return self.tokens
+
         if self.toke[0] == '"' and self.toke[len(self.toke)-1] == '"' and len(self.toke) > 1:
             self.tokens[len(self.tokens)-1].append("STR;"+self.toke.replace('"',""))
             self.toke = ""
             return self.tokens
         
-        if self.current_letter == "+" or self.counter == len(self.text[self.line_counter])-1 and self.toke[:-1].replace(".","").isnumeric():
-            if "." in self.toke:
-                self.tokens[len(self.tokens)-1].append("FLOAT;"+self.toke.replace(")",""))
-            else:
-                self.tokens[len(self.tokens)-1].append("INT;"+self.toke.replace(")",""))
+        if self.check_sign(self.current_letter) or self.counter == len(self.text[self.line_counter])-1 and self.toke[:-1].replace(".","").isnumeric():
+            
+            if self.toke[:-1].replace(" ","").count(".") == 1:
+                if self.check_sign(self.toke[-1]):
+                    self.tokens[len(self.tokens)-1].append("FLOAT;"+self.toke[:-1].replace(" ",""))
+                else:
+                    self.tokens[len(self.tokens)-1].append("FLOAT;"+self.toke.replace(" ",""))
+                            
+            elif self.toke[:-1].replace(" ","").isnumeric():
+                if self.check_sign(self.toke[-1]):
+                    self.tokens[len(self.tokens)-1].append("INT;"+self.toke[:-1].replace(" ",""))
+                else:
+                    self.tokens[len(self.tokens)-1].append("INT;"+self.toke.replace(" ",""))
+
+            if self.check_sign(self.toke[-1]):
+                self.tokens[len(self.tokens)-1].append(self.toke[-1])
+            self.toke = ""
             return self.tokens
 
         #Create a Var section
@@ -107,6 +125,7 @@ class Lexer:
 
             if self.tokens[self.line_counter][0] == "var":
 
+                
                 var_t_name = self.text[self.line_counter][self.text[self.line_counter].index("var")+4:].split("=")[0][:-1]
                 var_t_carry = self.text[self.line_counter][self.text[self.line_counter].index("var")+4:].split("=")[1][1:]
                 toke_t = ""
@@ -121,6 +140,13 @@ class Lexer:
                     counter_t += 1 
                    
                     if toke_t == " ":
+                        toke_t = ""
+                    elif toke_t in self.varss.keys():
+                        var_t_tokens.append("VAR;"+toke_t)
+                        toke_t = ""
+                    elif toke_t[0] == '"' and toke_t[len(toke_t)-1] == '"' and len(toke_t) > 1:
+                        
+                        var_t_tokens.append("STR;"+toke_t.replace('"',""))
                         toke_t = ""
                     elif self.check_sign(letter) or counter_t == len(var_t_carry):
                         
@@ -140,7 +166,7 @@ class Lexer:
                         toke_t = ""
                 self.varss[var_t_name] = Var(var_t_name,var_t_tokens)
                 self.tokens[len(self.tokens)-1].append(var_t_name)
-                    
+                
                 # print("BLA",var_t_tokens)
                 
                 self.toke = ""
@@ -155,6 +181,7 @@ class Lexer:
         
 
 def check_file(file_t):
+
     file_ender = file_t[file_t.index(".")+1:]
     if file_ender == "eclip":
         pass
@@ -171,10 +198,13 @@ def read_file(file_t):
             if letter[len(letter)-1] == "\n":
                 letter = letter[:len(letter)-1]
             new_text.append(letter)
+        if len(new_text) == 0:
+            raise Exception(ERROR_NAME+" Error: File is empty")
         return new_text
+
 def lex(text):
     lexer_t = Lexer(text)
-    # print(len(text))
+    
     
     lexer_t.run()
     
