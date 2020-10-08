@@ -2,7 +2,7 @@ type("Hello""There")
 type(1+2)
 var age = 16 + 2 + 3 * 1556
 var name = 15 + age
-var name1 = "Sean"
+var name1 = 22 + name
 type(age)
 get(age)
 type(age)

@@ -8,17 +8,18 @@ class Var:
         self.name = name
         self.carry = carry
         # self.type = self.get_type(carry)
-
+    
     def get_type(self,carry):
-        try:
-            if isinstance(carry,str):
-                return str
-            elif "." in carry:
-                return float
-            else:
-                return int
-        except:
-            return int
+        pass
+        # try:
+        #     if isinstance(carry,str):
+        #         return str
+        #     elif "." in carry:
+        #         return float
+        #     else:
+        #         return int
+        # except:
+        #     return int
 
     def get_carry(self):
         return self.carry
