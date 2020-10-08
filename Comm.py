@@ -42,15 +42,16 @@ class Lexer:
         for line in self.text:  
             for letter in line:
                 self.advance()
-                check = self.check_toke()
+                if len(self.text[self.line_counter]) > 0:
+                    check = self.check_toke()
                 if check == "con":
                     self.toke = ""
                     self.line_counter += 1
                     self.counter = -1
                     break
-                
-            check = ""
             self.tokens.append([]) 
+            check = ""
+            
         
            
 
@@ -59,7 +60,11 @@ class Lexer:
         if self.line_counter < len(self.text)-1:
             if self.counter >= len(self.text[self.line_counter]):
                 self.line_counter += 1
-                self.current_letter = self.text[self.line_counter][0] 
+                try:
+                    self.current_letter = self.text[self.line_counter][0]
+                    
+                except:
+                    pass
                 self.counter = 0
                 self.toke = ""
             else:
@@ -170,7 +175,7 @@ class Lexer:
                             var_t_tokens.append("CONNEC;"+toke_t)
                         elif var_t_type == "var":
                             ###################################################################
-                            print("var")
+                            var_t_tokens.append("VAR;"+toke_t)
                             # var_t_tokens.append()
                         toke_t = ""
                     elif toke_t[0] == '"' and toke_t[len(toke_t)-1] == '"' and len(toke_t) > 1:
@@ -228,37 +233,17 @@ def read_file(file_t):
         return new_text
 
 def lex(text):
-    lexer_t = Lexer(text)
-    
-    
+    lexer_t = Lexer(text) 
     lexer_t.run()
-    
     for key in lexer_t.varss.keys():
         print(lexer_t.varss[key].name,lexer_t.varss[key].carry,lexer_t.varss[key].type)
-    
-    # print(lexer_t.varss)
     print(lexer_t.tokens)
-
-    
-            
-    # print(lexer_t.current_letter)
-    # lexer_t.advance()
-    # print(lexer_t.current_letter,lexer_t.toke)
-    # print(text)
 def run(file_to_run):
     
     check_file(file_to_run)
     lex(read_file(file_to_run))
     
-    
-    
-    
-    
-    
+
 if __name__ == "__main__":
     run(argv[1])
 
-
-
-
-    

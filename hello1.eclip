@@ -5,3 +5,4 @@ typeln(agee)
 age = 17
 typeln(age)
 typeln(agee)
+get(age)
