@@ -1,8 +1,2 @@
 var age = 16
-connec agee = age + 3
-typeln(age)
-typeln(agee)
-age = 17
-typeln(age)
-typeln(agee)
-get(age)
+var ager =  age + 1

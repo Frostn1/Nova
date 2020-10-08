@@ -14,10 +14,7 @@ class Var:
         return self.type
     def get_carry(self):
         return self.carry
-def raise_error(text):
-    print("HOLLAAA")
-    raise Exception(ERROR_NAME+" Error:"+text)
-    print("YEPP")
+
 class Lexer:
     def __init__(self,text):
         self.text = text
@@ -83,6 +80,21 @@ class Lexer:
         return False
     def check_type(self,exp):
         pass
+    def calc(self,list_):
+
+        
+        sum = []
+        for word in list_:
+
+            if "VAR" in word or "CONNEC" in word:
+                sum.append(self.calc(self.varss[word[word.index(";")+1:]]))
+            else:
+                try:
+                    sum.append(word[word.index(";")+1:])
+                except:
+                    sum.append(word)
+                    pass
+        return sum
     def check_toke(self):
         
         for toke in self.key_words:
@@ -141,14 +153,16 @@ class Lexer:
 
                 var_t_type = self.tokens[self.line_counter][0]
                 if var_t_type == "var":
-                    var_t_name = self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+4:].split("=")[0][:-1]
-                    var_t_carry = self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+4:].split("=")[1][1:]
+                    
+                    var_t_name = (self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+4:].split("="))[0][:-1]
+                    var_t_carry = (self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+4:].split("="))[1][1:]
                 elif var_t_type == "connec":
                     var_t_name = self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+7:].split("=")[0][:-1]
                     var_t_carry = self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+7:].split("=")[1][1:]
                 toke_t = ""
                 var_t_tokens = []
                 counter_t = 0
+                sum = 0
                 #Name Checking:
                 if var_t_name in self.varss.keys():
                     raise Exception (ERROR_NAME+" Error: Var name '"+var_t_name+"',Has been manufactored before and can not again")
@@ -175,7 +189,17 @@ class Lexer:
                             var_t_tokens.append("CONNEC;"+toke_t)
                         elif var_t_type == "var":
                             ###################################################################
-                            var_t_tokens.append("VAR;"+toke_t)
+                            sum = eval(str(self.calc(self.varss[toke_t].carry)).replace("]",")").replace("[","(").replace(",","").replace("'",""))
+                            try:
+                                if isinstance(sum,float):
+                                    var_t_tokens.append("FLOAT;"+str(sum))
+                                elif isinstance(sum,int):
+                                    var_t_tokens.append("INT;"+str(sum))
+                                
+                            except Exception as e:
+                                print("PROBLEM",e)
+                            print(sum)
+                            # var_t_tokens.append("VAR;"+toke_t)
                             # var_t_tokens.append()
                         toke_t = ""
                     elif toke_t[0] == '"' and toke_t[len(toke_t)-1] == '"' and len(toke_t) > 1:
@@ -198,6 +222,7 @@ class Lexer:
                         if self.check_sign(toke_t[-1]):
                             var_t_tokens.append(toke_t[-1])
                         toke_t = ""
+
                 self.varss[var_t_name] = Var(var_t_name,var_t_tokens,var_t_type)
                 self.tokens[len(self.tokens)-1].append(var_t_name)
                 self.toke = ""
@@ -208,7 +233,7 @@ class Lexer:
                 
         return self.tokens
         
-        
+       
 
 def check_file(file_t):
 
@@ -238,6 +263,7 @@ def lex(text):
     for key in lexer_t.varss.keys():
         print(lexer_t.varss[key].name,lexer_t.varss[key].carry,lexer_t.varss[key].type)
     print(lexer_t.tokens)
+    # print(lexer_t.varss)
 def run(file_to_run):
     
     check_file(file_to_run)
@@ -247,3 +273,13 @@ def run(file_to_run):
 if __name__ == "__main__":
     run(argv[1])
 
+
+
+
+"""
+Hello there!
+I think u r on deafen...
+U can type stuff in the chat if u want
+I am still waiting for u to undeafen...(23:00)
+
+"""
