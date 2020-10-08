@@ -4,26 +4,20 @@ ERROR_NAME = "Goblin"
 COMPILER_NAME = "Commander"
 class Var:
 
-    def __init__(self,name,carry):
+    def __init__(self,name,carry,type_):
         self.name = name
         self.carry = carry
-        # self.type = self.get_type(carry)
+        self.type = type_
     
-    def get_type(self,carry):
-        pass
-        # try:
-        #     if isinstance(carry,str):
-        #         return str
-        #     elif "." in carry:
-        #         return float
-        #     else:
-        #         return int
-        # except:
-        #     return int
-
+    
+    def get_type(self):
+        return self.type
     def get_carry(self):
         return self.carry
-
+def raise_error(text):
+    print("HOLLAAA")
+    raise Exception(ERROR_NAME+" Error:"+text)
+    print("YEPP")
 class Lexer:
     def __init__(self,text):
         self.text = text
@@ -35,12 +29,15 @@ class Lexer:
             "typeln(",
             "type(",
             "var",
+            "connec",
             "get("
         ]
+
         self.tokens = [[]]
         self.varss = {}
     
     def run(self):
+
         check = ""
         for line in self.text:  
             for letter in line:
@@ -74,16 +71,19 @@ class Lexer:
                 self.toke += self.current_letter
 
     def check_sign(self,toke):
-        self.sign_list = ["+","-","*","/","^","(",")"]
+        self.sign_list = ["+","-","*","/","^","(",")","="]
         for sign in self.sign_list:
             if sign == toke:
                 return sign
         return False
-
+    def check_type(self,exp):
+        pass
     def check_toke(self):
         
         for toke in self.key_words:
+            
             if self.toke == toke:
+                
                 self.tokens[len(self.tokens)-1].append(self.toke)
                 self.toke = ""
                 return self.tokens
@@ -92,11 +92,13 @@ class Lexer:
             self.toke = ""
             return self.tokens
             
-        if self.toke in self.varss.keys():
-            self.tokens[len(self.tokens)-1].append("VAR;"+self.toke)
-            self.toke = ""
-            return self.tokens
-
+        # if self.toke in sorted(self.varss, key=len, reverse=True):
+        #     print(sorted(self.varss, key=len, reverse=True))
+        #     self.tokens[len(self.tokens)-1].append("VAR;"+self.toke)
+        #     self.toke = ""
+        #     return self.tokens
+       
+        
         if self.toke[0] == '"' and self.toke[len(self.toke)-1] == '"' and len(self.toke) > 1:
             self.tokens[len(self.tokens)-1].append("STR;"+self.toke.replace('"',""))
             self.toke = ""
@@ -117,33 +119,59 @@ class Lexer:
                     self.tokens[len(self.tokens)-1].append("INT;"+self.toke.replace(" ",""))
 
             if self.check_sign(self.toke[-1]):
+                
+                if self.toke.replace(" ","")[:-1] in sorted(self.varss, key=len, reverse=True):
+                    
+                    self.tokens[len(self.tokens)-1].append("VAR;"+self.toke.replace(" ","")[:-1])
                 self.tokens[len(self.tokens)-1].append(self.toke[-1])
+                
             self.toke = ""
             return self.tokens
 
         #Create a Var section
-        try:
+        
+        
+        if len(self.tokens[self.line_counter]) > 0:
+            if self.tokens[self.line_counter][0] == "var" or self.tokens[self.line_counter][0] == "connec":
 
-            if self.tokens[self.line_counter][0] == "var":
-
-                
-                var_t_name = self.text[self.line_counter][self.text[self.line_counter].index("var")+4:].split("=")[0][:-1]
-                var_t_carry = self.text[self.line_counter][self.text[self.line_counter].index("var")+4:].split("=")[1][1:]
+                var_t_type = self.tokens[self.line_counter][0]
+                if var_t_type == "var":
+                    var_t_name = self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+4:].split("=")[0][:-1]
+                    var_t_carry = self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+4:].split("=")[1][1:]
+                elif var_t_type == "connec":
+                    var_t_name = self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+7:].split("=")[0][:-1]
+                    var_t_carry = self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+7:].split("=")[1][1:]
                 toke_t = ""
                 var_t_tokens = []
                 counter_t = 0
                 #Name Checking:
                 if var_t_name in self.varss.keys():
                     raise Exception (ERROR_NAME+" Error: Var name '"+var_t_name+"',Has been manufactored before and can not again")
-                
+                else:
+                    
+                    for number in ["1","2","3","4","5","6","7","8","9","0"]:
+                        if number in var_t_name:
+                            
+                            
+                            raise Exception(ERROR_NAME+" Error: Var name '"+var_t_name+"',Contains invalid characters")
+                            
+                            # raise_error("Var name '"+var_t_name+"',Contains invalid characters")
+                            
+                            
+            try: 
                 for letter in var_t_carry:
                     toke_t += letter
                     counter_t += 1 
-                   
+                    
                     if toke_t == " ":
                         toke_t = ""
                     elif toke_t in self.varss.keys():
-                        var_t_tokens.append("VAR;"+toke_t)
+                        if var_t_type == "connec":
+                            var_t_tokens.append("CONNEC;"+toke_t)
+                        elif var_t_type == "var":
+                            ###################################################################
+                            print("var")
+                            # var_t_tokens.append()
                         toke_t = ""
                     elif toke_t[0] == '"' and toke_t[len(toke_t)-1] == '"' and len(toke_t) > 1:
                         
@@ -157,7 +185,7 @@ class Lexer:
                             else:
                                 var_t_tokens.append("FLOAT;"+toke_t.replace(" ",""))
                             
-                        elif toke_t[:-1].replace(" ","").isnumeric():
+                        elif toke_t[:-1].replace(" ","").isnumeric() or toke_t.replace(" ","").isnumeric():
                             if self.check_sign(toke_t[-1]):
                                 var_t_tokens.append("INT;"+toke_t[:-1].replace(" ",""))
                             else:
@@ -165,18 +193,14 @@ class Lexer:
                         if self.check_sign(toke_t[-1]):
                             var_t_tokens.append(toke_t[-1])
                         toke_t = ""
-                self.varss[var_t_name] = Var(var_t_name,var_t_tokens)
+                self.varss[var_t_name] = Var(var_t_name,var_t_tokens,var_t_type)
                 self.tokens[len(self.tokens)-1].append(var_t_name)
-                
-                # print("BLA",var_t_tokens)
-                
                 self.toke = ""
-                
                 return "con"
+            except:
+                pass
                 
-        except:
-            
-            pass
+                
         return self.tokens
         
         
@@ -186,7 +210,7 @@ def check_file(file_t):
     file_ender = file_t[file_t.index(".")+1:]
     if file_ender == "eclip":
         pass
-    else:
+    else:  
         raise Exception (ERROR_NAME+" Error: Wrong file type given to the "+COMPILER_NAME)
         
 
@@ -210,7 +234,7 @@ def lex(text):
     lexer_t.run()
     
     for key in lexer_t.varss.keys():
-        print(lexer_t.varss[key].name,lexer_t.varss[key].carry)
+        print(lexer_t.varss[key].name,lexer_t.varss[key].carry,lexer_t.varss[key].type)
     
     # print(lexer_t.varss)
     print(lexer_t.tokens)
