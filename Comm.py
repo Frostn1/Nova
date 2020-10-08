@@ -83,8 +83,10 @@ class Lexer:
 
         sum = []
         for word in list_:
-
+            print("Word",word)
             if "VAR" in word or "CONNEC" in word:
+                
+                
                 sum.append(self.calc(self.varss[word[word.index(";")+1:]]))
             else:
                 try:
@@ -106,14 +108,6 @@ class Lexer:
         if self.toke == " ":
             self.toke = ""
             return self.tokens
-            
-        # if self.toke in sorted(self.varss, key=len, reverse=True):
-        #     print(sorted(self.varss, key=len, reverse=True))
-        #     self.tokens[len(self.tokens)-1].append("VAR;"+self.toke)
-        #     self.toke = ""
-        #     return self.tokens
-       
-        
         if self.toke[0] == '"' and self.toke[len(self.toke)-1] == '"' and len(self.toke) > 1:
             self.tokens[len(self.tokens)-1].append("STR;"+self.toke.replace('"',""))
             self.toke = ""
@@ -161,6 +155,7 @@ class Lexer:
                 var_t_tokens = []
                 counter_t = 0
                 sum = 0
+                final_sum = 0
                 #Name Checking:
                 if var_t_name in self.varss.keys():
                     raise Exception (ERROR_NAME+" Error: Var name '"+var_t_name+"',Has been manufactored before and can not again")
@@ -182,27 +177,7 @@ class Lexer:
                     
                     if toke_t == " ":
                         toke_t = ""
-                    elif toke_t in self.varss.keys():
-                        if var_t_type == "connec":
-                            var_t_tokens.append("CONNEC;"+toke_t)
-                        elif var_t_type == "var":
-                            try:
-                                sum = eval(str(self.calc(self.varss[toke_t].carry)).replace("]",")").replace("[","(").replace(",","").replace("'",""))
-                            except Exception as e:
-                                raise Exception(ERROR_NAME + " Error: Cant connect str to int/float.")
-                                
-                            
-                            if isinstance(sum,float):
-                                var_t_tokens.append("FLOAT;"+str(sum))
-                            elif isinstance(sum,int):
-                                var_t_tokens.append("INT;"+str(sum))
-                                
-                            
-                            
-                            # var_t_tokens.append("VAR;"+toke_t)
-                            # var_t_tokens.append()
-                        toke_t = ""
-                
+                    
                     elif toke_t[0] == '"' and toke_t[len(toke_t)-1] == '"' and len(toke_t) > 1:
                         
                         var_t_tokens.append("STR;"+toke_t.replace('"',""))
@@ -221,10 +196,40 @@ class Lexer:
                             else:
                                 var_t_tokens.append("INT;"+toke_t.replace(" ",""))
                         if self.check_sign(toke_t[-1]):
-                            var_t_tokens.append(toke_t[-1])
-                        toke_t = ""
+                            if toke_t.replace(" ","")[:-1] in sorted(self.varss, key=len, reverse=True):
+                                if var_t_type == "connec":
+                                    var_t_tokens.append("CONNEC;"+toke_t)
+                                elif var_t_type == "var":
+                                    
+                                    try:
+                                        sum = eval(str(self.calc(self.varss[toke_t.replace(" ","")[:-1]].carry)).replace("]",")").replace("[","(").replace(",","").replace("'",""))
+                                    except Exception as e:
+                                        raise Exception(ERROR_NAME + " Error: Cant connect str to int/float.",)
 
-                self.varss[var_t_name] = Var(var_t_name,var_t_tokens,var_t_type)
+                                    if isinstance(sum,float):
+                                        var_t_tokens.append("FLOAT;"+str(sum))
+                                    elif isinstance(sum,int):
+                                        var_t_tokens.append("INT;"+str(sum)) 
+                                    sum = 0
+
+                                    # var_t_tokens.append("VAR;"+toke_t)
+                                    # var_t_tokens.append()
+                            var_t_tokens.append(toke_t[-1])
+                            toke_t = ""
+               
+                try:
+                    if var_t_type == "var":
+                        sum = str(eval(str(self.calc(var_t_tokens)).replace("]",")").replace("[","(").replace(",","").replace("'","")))
+                        if sum.count(".") == 1:
+                            final_sum = ["FLOAT;" + sum]
+                        else :
+                            final_sum = ["INT;" + sum]
+                        self.varss[var_t_name] = Var(var_t_name,final_sum,var_t_type)
+                    else:
+                        self.varss[var_t_name] = Var(var_t_name,var_t_tokens,var_t_type)
+                except Exception as e:
+                    print(e)
+                
                 self.tokens[len(self.tokens)-1].append(var_t_name)
                 self.toke = ""
                 return "con"

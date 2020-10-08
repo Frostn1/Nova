@@ -1,5 +1,6 @@
 var age = 12
-connec ager =  age + 1
+var agee = age + 2
+var ager =  agee + 1
 type(age)
 type(ager)
 age = 13
