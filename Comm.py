@@ -177,7 +177,7 @@ class Lexer:
                             # raise_error("Var name '"+var_t_name+"',Contains invalid characters")
                             
                             
-            try: 
+             
                 for letter in var_t_carry:
                     toke_t += letter
                     counter_t += 1 
@@ -188,20 +188,23 @@ class Lexer:
                         if var_t_type == "connec":
                             var_t_tokens.append("CONNEC;"+toke_t)
                         elif var_t_type == "var":
-                            ###################################################################
-                            sum = eval(str(self.calc(self.varss[toke_t].carry)).replace("]",")").replace("[","(").replace(",","").replace("'",""))
                             try:
-                                if isinstance(sum,float):
-                                    var_t_tokens.append("FLOAT;"+str(sum))
-                                elif isinstance(sum,int):
-                                    var_t_tokens.append("INT;"+str(sum))
-                                
+                                sum = eval(str(self.calc(self.varss[toke_t].carry)).replace("]",")").replace("[","(").replace(",","").replace("'",""))
                             except Exception as e:
-                                print("PROBLEM",e)
-                            print(sum)
+                                raise Exception(ERROR_NAME + " Error: Cant connect str to int/float.")
+                                
+                            
+                            if isinstance(sum,float):
+                                var_t_tokens.append("FLOAT;"+str(sum))
+                            elif isinstance(sum,int):
+                                var_t_tokens.append("INT;"+str(sum))
+                                
+                            
+                            
                             # var_t_tokens.append("VAR;"+toke_t)
                             # var_t_tokens.append()
                         toke_t = ""
+                
                     elif toke_t[0] == '"' and toke_t[len(toke_t)-1] == '"' and len(toke_t) > 1:
                         
                         var_t_tokens.append("STR;"+toke_t.replace('"',""))
@@ -227,8 +230,7 @@ class Lexer:
                 self.tokens[len(self.tokens)-1].append(var_t_name)
                 self.toke = ""
                 return "con"
-            except:
-                pass
+                
                 
                 
         return self.tokens
@@ -261,7 +263,7 @@ def lex(text):
     lexer_t = Lexer(text) 
     lexer_t.run()
     for key in lexer_t.varss.keys():
-        print(lexer_t.varss[key].name,lexer_t.varss[key].carry,lexer_t.varss[key].type)
+        print(lexer_t.varss[key].name,lexer_t.varss[key].carry)
     print(lexer_t.tokens)
     # print(lexer_t.varss)
 def run(file_to_run):
