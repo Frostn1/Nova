@@ -78,11 +78,9 @@ class Lexer:
             if sign == toke:
                 return sign
         return False
-    def check_type(self,exp):
-        pass
+    
     def calc(self,list_):
 
-        
         sum = []
         for word in list_:
 
@@ -274,14 +272,3 @@ def run(file_to_run):
 
 if __name__ == "__main__":
     run(argv[1])
-
-
-
-
-"""
-Hello there!
-I think u r on deafen...
-U can type stuff in the chat if u want
-I am still waiting for u to undeafen...(23:00)
-
-"""
