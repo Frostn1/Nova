@@ -2,6 +2,9 @@ from sys import *
 import os
 ERROR_NAME = "Goblin"
 COMPILER_NAME = "Commander"
+
+LINKED_VAR_NAME = "link"
+REGULAR_VAR_NAME = "var"
 class Var:
 
     def __init__(self,name,carry,type_):
@@ -26,7 +29,7 @@ class Lexer:
             "typeln(",
             "type(",
             "var",
-            "connec",
+            "link",
             "get("
         ]
 
@@ -84,7 +87,7 @@ class Lexer:
         sum = []
         for word in list_:
             
-            if "VAR" in word or "CONNEC" in word:
+            if "VAR" in word or LINKED_VAR_NAME in word:
                 sum.append(self.calc(self.varss[word[word.index(";")+1:]]))
             else:
                 try:
@@ -132,7 +135,8 @@ class Lexer:
             try:
                 if self.check_sign(self.toke[-1]) or self.toke[-1] == '"':
                     
-                    if self.toke.replace(" ","")[:-1] in sorted(self.varss, key=len, reverse=True):
+                    if self.toke.replace(" ","")[:-1] in sorted(self.varss.keys(), key=len, reverse=True):
+                        
                         if self.toke[-1] == '"':
                             self.tokens[len(self.tokens)-1].append("VAR;"+self.toke.replace(" ","")[:-1])
                             self.toke = self.toke[-1]
@@ -155,21 +159,23 @@ class Lexer:
         
         
         if len(self.tokens) > self.line_counter and len(self.tokens[self.line_counter]) > 0:
-            if self.tokens[self.line_counter][0] == "var" or self.tokens[self.line_counter][0] == "connec":
+            if self.tokens[self.line_counter][0] == "var" or self.tokens[self.line_counter][0] == LINKED_VAR_NAME:
 
                 var_t_type = self.tokens[self.line_counter][0]
                 if var_t_type == "var":
                     
                     var_t_name = (self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+4:].split("="))[0][:-1]
                     var_t_carry = (self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+4:].split("="))[1][1:]
-                elif var_t_type == "connec":
-                    var_t_name = self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+7:].split("=")[0][:-1]
-                    var_t_carry = self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+7:].split("=")[1][1:]
+
+                elif var_t_type == LINKED_VAR_NAME:
+                    var_t_name = self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+5:].split("=")[0][:-1]
+                    var_t_carry = self.text[self.line_counter][self.text[self.line_counter].index(var_t_type)+5:].split("=")[1][1:]
                 toke_t = ""
                 var_t_tokens = []
                 counter_t = 0
                 sum = 0
                 final_sum = 0
+                print(var_t_carry)
                 #Name Checking:
                 if var_t_name in self.varss.keys():
                     raise Exception (ERROR_NAME+" Error: Var name '"+var_t_name+"',Has been manufactored before and can not again")
@@ -177,14 +183,9 @@ class Lexer:
                     
                     for number in ["1","2","3","4","5","6","7","8","9","0"]:
                         if number in var_t_name:
-                            
-                            
+        
                             raise Exception(ERROR_NAME+" Error: Var name '"+var_t_name+"',Contains invalid characters")
                             
-                            # raise_error("Var name '"+var_t_name+"',Contains invalid characters")
-                            
-                            
-             
                 for letter in var_t_carry:
                     toke_t += letter
                     counter_t += 1 
@@ -211,8 +212,8 @@ class Lexer:
                                 var_t_tokens.append("INT;"+toke_t.replace(" ",""))
                         if self.check_sign(toke_t[-1]):
                             if toke_t.replace(" ","")[:-1] in sorted(self.varss, key=len, reverse=True):
-                                if var_t_type == "connec":
-                                    var_t_tokens.append("CONNEC;"+toke_t.replace(" ","")[:-1])
+                                if var_t_type == LINKED_VAR_NAME:
+                                    var_t_tokens.append("LINK;"+toke_t.replace(" ","")[:-1])
                                 elif var_t_type == "var":
                                     
                                     try:
@@ -256,7 +257,8 @@ class Parser:
         self.varss = varss
         self.line_counter = 0
     def run(self):
-        
+        for key in self.varss.keys():
+            print(self.varss[key].carry)
         for line in self.tokens:
             self.execute(line) 
             self.line_counter += 1
@@ -265,7 +267,7 @@ class Parser:
         sum = []
         for word in list_:
             
-            if "VAR" in word or "CONNEC" in word:
+            if "VAR" in word or LINKED_VAR_NAME in word:
                 sum.append(self.calc(self.varss[word[word.index(";")+1:]].carry))
             else:
                 try:
@@ -301,11 +303,12 @@ class Parser:
                         state = 1
                         while "STR" not in line[i]  and i < len(line)-1:
                             if "VAR" in line[i]:
-                                
+                                exp += str(self.calc(self.varss[line[i][line[i].index(";")+1:]].carry)).replace("]",")").replace("[","(").replace(",","").replace("'","")
+                                print(exp)
                                 try:
-                                    exp += str(eval(str(self.calc(self.varss[line[i][line[i].index(";")+1:]].carry)).replace("]",")").replace("[","(").replace(",","").replace("'","")))
+                                    exp = str(eval(exp))
                                 except:
-                                    print("PROBLEM")
+                                    pass
                             elif ";" in line[i]:
                                 exp += line[i][line[i].index(";")+1:]
                             else:
@@ -315,7 +318,10 @@ class Parser:
                             final_prin += str(eval(exp))
                             exp = ""
                         except:
-                            final_prin += str(exp)
+                            if exp[-1] == ")" and exp[0] == "(":
+                                final_prin += str(exp[1:-1])
+                            else:
+                                final_prin += str(exp)
                             pass
                     
                 else:
@@ -356,17 +362,46 @@ class Parser:
                     
                 final_carry.append(new_type + str(new_carry))
                 self.varss[line[0][line[0].index(";")+1:]].carry = final_carry
-        
+
+    def input_data(self,line):
+        if len(line) != 3:
+            raise Exception(ERROR_NAME + " Error: number of arguments given to the 'get' function is wrong.")
+        else:
+            
+            if line[1][line[1].index(";")+1:] in sorted(self.varss.keys(), key=len, reverse=True):
+                
+                if self.varss[line[1][line[1].index(";")+1:]].type == "var":
+                    new_type = ""
+                    final_carry = []
+                    inp = input()
+                    
+                    try:
+                        inp = eval(inp)
+                        if isinstance(inp,float):
+                            new_type = "FLOAT;"
+                        elif isinstance(inp,int):
+                            new_type = "INT;"
+                    except:
+                        new_type = "STR;"
+                    final_carry.append(new_type + str(inp))
+                    self.varss[line[1][line[1].index(";")+1:]].carry = final_carry
+                else:
+                    raise Exception(ERROR_NAME + " Error: Cant modify a CONNEC var, as its a CONST.")
+            else:
+                raise Exception(ERROR_NAME + " Error: The Var given to the get function hasnt been manufactored yet.")
     def execute(self,line):
         
         if len(line) < 1:
             pass
         elif line[0] == "type(" or line[0] == "typeln(":
             self.typing(line)
-        elif line[0] == "var" or line[0] == "connec":
+        elif line[0] == "var" or line[0] == LINKED_VAR_NAME:
             pass
+        elif line[0] == "get(":
+           self.input_data(line)
         elif line[0][line[0].index(";")+1:] in sorted(self.varss.keys(), key=len, reverse=True):
             self.alter_var(line)
+        
         
 
 def check_file(file_t):
@@ -399,11 +434,8 @@ def read_file(file_t):
 def lex(text):
     lexer_t = Lexer(text) 
     lexer_t.run()
-    # for key in lexer_t.varss.keys():
-    #     print(lexer_t.varss[key].name,lexer_t.varss[key].carry)
-    # print(lexer_t.tokens)
-    
     return lexer_t.tokens, lexer_t.varss
+
 def parse(tokens,varss):
     parser_t = Parser(tokens,varss)
     parser_t.run()

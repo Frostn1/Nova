@@ -1,14 +1,8 @@
-var age = 16 
-connec agee = age + 1
-var ager = age + 1
-$Comment
-$This Comment
-
-
-typeln("age"age)
-typeln("agee"agee)$This
-typeln("ager"ager)
-age = 20
-typeln("age"age)
-typeln("agee"agee)
-typeln("ager"ager)
+var x = 0
+var y = 0
+link dist = x - y
+typeln("What is the x?")
+get(x)
+typeln("What is the y?")
+get(y)
+typeln("The dist is"dist)
