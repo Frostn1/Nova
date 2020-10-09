@@ -267,8 +267,8 @@ class Parser:
         self.varss = varss
         self.line_counter = 0
     def run(self):
-        for key in self.varss.keys():
-            print(self.varss[key].carry)
+        # for key in self.varss.keys():
+        #     print(self.varss[key].carry)
         
         # print(self.tokens)
         for line in self.tokens:
