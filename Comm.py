@@ -87,7 +87,7 @@ class Lexer:
         sum = []
         for word in list_:
             
-            if "VAR" in word or LINKED_VAR_NAME in word:
+            if "VAR" in word or "LINK" in word:
                 sum.append(self.calc(self.varss[word[word.index(";")+1:]]))
             else:
                 try:
@@ -175,7 +175,7 @@ class Lexer:
                 counter_t = 0
                 sum = 0
                 final_sum = 0
-                print(var_t_carry)
+                
                 #Name Checking:
                 if var_t_name in self.varss.keys():
                     raise Exception (ERROR_NAME+" Error: Var name '"+var_t_name+"',Has been manufactored before and can not again")
@@ -213,6 +213,7 @@ class Lexer:
                         if self.check_sign(toke_t[-1]):
                             if toke_t.replace(" ","")[:-1] in sorted(self.varss, key=len, reverse=True):
                                 if var_t_type == LINKED_VAR_NAME:
+                                    
                                     var_t_tokens.append("LINK;"+toke_t.replace(" ","")[:-1])
                                 elif var_t_type == "var":
                                     
@@ -231,6 +232,10 @@ class Lexer:
                                     # var_t_tokens.append()
                             var_t_tokens.append(toke_t[-1])
                             toke_t = ""
+                        elif counter_t == len(var_t_carry):
+                            if var_t_type == LINKED_VAR_NAME:
+                                
+                                var_t_tokens.append("LINK;"+toke_t.replace(" ",""))
                
                 try:
                     if var_t_type == "var":
@@ -257,8 +262,8 @@ class Parser:
         self.varss = varss
         self.line_counter = 0
     def run(self):
-        for key in self.varss.keys():
-            print(self.varss[key].carry)
+        # for key in self.varss.keys():
+        #     print(self.varss[key].carry)
         for line in self.tokens:
             self.execute(line) 
             self.line_counter += 1
@@ -267,7 +272,7 @@ class Parser:
         sum = []
         for word in list_:
             
-            if "VAR" in word or LINKED_VAR_NAME in word:
+            if "VAR" in word or "LINK" in word:
                 sum.append(self.calc(self.varss[word[word.index(";")+1:]].carry))
             else:
                 try:
@@ -302,9 +307,9 @@ class Parser:
                         
                         state = 1
                         while "STR" not in line[i]  and i < len(line)-1:
-                            if "VAR" in line[i]:
+                            if "VAR" in line[i] or "LINK" in line[i]:
                                 exp += str(self.calc(self.varss[line[i][line[i].index(";")+1:]].carry)).replace("]",")").replace("[","(").replace(",","").replace("'","")
-                                print(exp)
+                                
                                 try:
                                     exp = str(eval(exp))
                                 except:
