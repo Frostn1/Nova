@@ -3,6 +3,8 @@ connec agee = age + 1
 var ager = age + 1
 $Comment
 $This Comment
+
+
 typeln("age"age)
 typeln("agee"agee)$This
 typeln("ager"ager)

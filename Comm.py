@@ -113,27 +113,18 @@ class Lexer:
                 return self.tokens
         
         if self.check_sign(self.current_letter) or self.counter == len(self.text[self.line_counter])-1 and (self.toke[:-1].replace(".","").isnumeric() or self.toke.replace(".","").isnumeric()) or self.toke.replace(" ","")[-1] == '"' and len(self.toke.replace(" ","")) > 1:
-            
-
+ 
             if self.toke[:-1].replace(" ","").count(".") == 1:
                 if self.check_sign(self.toke[-1]):
-                    self.tokens[len(self.tokens)-1].append("FLOAT;"+self.toke[:-1].replace(" ",""))
-                    
+                    self.tokens[len(self.tokens)-1].append("FLOAT;"+self.toke[:-1].replace(" ","")) 
                 else:
-                    self.tokens[len(self.tokens)-1].append("FLOAT;"+self.toke.replace(" ",""))
-                    
-                            
+                    self.tokens[len(self.tokens)-1].append("FLOAT;"+self.toke.replace(" ",""))                 
             elif self.toke.replace(" ","")[:-1].isnumeric() or self.toke.replace(" ","").isnumeric():
                 
                 if self.check_sign(self.toke[-1]) or self.toke[-1] == '"':
-                    
-
                     self.tokens[len(self.tokens)-1].append("INT;"+self.toke[:-1].replace(" ",""))
                     if self.toke[-1] == '"':
-                        self.toke = self.toke[-1]
-                    
-                        
-                   
+                        self.toke = self.toke[-1] 
                 else:
                     
                     self.tokens[len(self.tokens)-1].append("INT;"+self.toke.replace(" ",""))
@@ -265,7 +256,7 @@ class Parser:
         self.varss = varss
         self.line_counter = 0
     def run(self):
-        print(self.tokens)
+        
         for line in self.tokens:
             self.execute(line) 
             self.line_counter += 1
@@ -301,13 +292,6 @@ class Parser:
             if "STR" in param:
                 state = 0
                 final_prin += param[param.index(";")+1:]
-                
-            # elif "VAR" in param or "CONNEC" in param:
-                
-            #     state = 0
-            #     sum = str(eval(str(self.calc(self.varss[param[param.index(";")+1:]].carry)).replace("]",")").replace("[","(").replace(",","").replace("'","")))
-            #     final_prin += sum
-                
             else:
                 
                 if state == 0:
@@ -399,13 +383,18 @@ def read_file(file_t):
     with open(file_t) as file1:
         text = file1.readlines()
         new_text = []
+        final_text = []
         for letter in text:
             if letter[len(letter)-1] == "\n":
                 letter = letter[:len(letter)-1]
             new_text.append(letter)
         if len(new_text) == 0:
             raise Exception(ERROR_NAME+" Error: File is empty")
-        return new_text
+        for line in new_text:
+            if len(line) >= 1:
+                final_text.append(line)
+        
+        return final_text
 
 def lex(text):
     lexer_t = Lexer(text) 
