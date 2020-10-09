@@ -195,7 +195,9 @@ class Lexer:
                     
                     elif toke_t[0] == '"' and toke_t[len(toke_t)-1] == '"' and len(toke_t) > 1:
                         
+                        
                         var_t_tokens.append("STR;"+toke_t.replace('"',""))
+                        
                         toke_t = ""
                     elif self.check_sign(letter) or counter_t == len(var_t_carry):
                         
@@ -211,7 +213,9 @@ class Lexer:
                             else:
                                 var_t_tokens.append("INT;"+toke_t.replace(" ",""))
                         if self.check_sign(toke_t[-1]):
-                            if toke_t.replace(" ","")[:-1] in sorted(self.varss, key=len, reverse=True):
+                             
+                            if toke_t.replace(" ","")[:-1] in sorted(self.varss.keys(), key=len, reverse=True):
+                                
                                 if var_t_type == LINKED_VAR_NAME:
                                     
                                     var_t_tokens.append("LINK;"+toke_t.replace(" ","")[:-1])
@@ -232,22 +236,23 @@ class Lexer:
                                     # var_t_tokens.append()
                             var_t_tokens.append(toke_t[-1])
                             toke_t = ""
-                        elif counter_t == len(var_t_carry):
-                            if var_t_type == LINKED_VAR_NAME:
+                        elif counter_t == len(var_t_carry) and var_t_type == LINKED_VAR_NAME and toke_t in sorted(self.varss.keys(), key=len, reverse=True):
                                 
                                 var_t_tokens.append("LINK;"+toke_t.replace(" ",""))
                
                 try:
                     if var_t_type == "var":
-                        sum = str(eval(str(self.calc(var_t_tokens)).replace("]",")").replace("[","(").replace(",","").replace("'","")))
+                        sum = str(eval(str(self.calc(var_t_tokens)).replace("]",")").replace("[","(").replace(",","").replace("'","").replace("^","**")))
                         if sum.count(".") == 1:
                             final_sum = ["FLOAT;" + sum]
                         else :
                             final_sum = ["INT;" + sum]
                         self.varss[var_t_name] = Var(var_t_name,final_sum,var_t_type)
                     else:
+                        
                         self.varss[var_t_name] = Var(var_t_name,var_t_tokens,var_t_type)
                 except Exception as e:
+                    self.varss[var_t_name] = Var(var_t_name,var_t_tokens,var_t_type)
                     pass
                 
                 self.tokens[len(self.tokens)-1].append(var_t_name)
@@ -262,8 +267,10 @@ class Parser:
         self.varss = varss
         self.line_counter = 0
     def run(self):
-        # for key in self.varss.keys():
-        #     print(self.varss[key].carry)
+        for key in self.varss.keys():
+            print(self.varss[key].carry)
+        
+        # print(self.tokens)
         for line in self.tokens:
             self.execute(line) 
             self.line_counter += 1
@@ -281,6 +288,15 @@ class Parser:
                     sum.append(word)
                     pass
         return sum
+    
+    def simplify(self,list1,list2=[]):
+    
+        for element in list1:
+            if type(element)!=list:
+                list2.append(element)
+            else:
+                self.simplify(element,list2)
+        return list2
     def check_sign(self,toke):
         self.sign_list = ["+","-","*","/","^","(",")","="]
         for sign in self.sign_list:
@@ -291,9 +307,9 @@ class Parser:
         final_prin = ""
         counter = 0
         state = 0
-        exp = ""
+        exp = []
         i = 0
-        sum = 0
+        final_exp = ""
         for param in line[1:]:
             
             if "STR" in param:
@@ -308,30 +324,23 @@ class Parser:
                         state = 1
                         while "STR" not in line[i]  and i < len(line)-1:
                             if "VAR" in line[i] or "LINK" in line[i]:
-                                exp += str(self.calc(self.varss[line[i][line[i].index(";")+1:]].carry)).replace("]",")").replace("[","(").replace(",","").replace("'","")
-                                
-                                try:
-                                    exp = str(eval(exp))
-                                except:
-                                    pass
-                            elif ";" in line[i]:
-                                exp += line[i][line[i].index(";")+1:]
-                            else:
-                                exp += line[i]
+
+                                exp.append(self.calc(self.varss[line[i][line[i].index(";")+1:]].carry))
                             i += 1
+                        
+                        exp = self.simplify(exp,[])
+                        for param in exp:
+                            final_exp += param
                         try:
-                            final_prin += str(eval(exp))
-                            exp = ""
+                            final_exp = str(eval(final_exp))
                         except:
-                            if exp[-1] == ")" and exp[0] == "(":
-                                final_prin += str(exp[1:-1])
-                            else:
-                                final_prin += str(exp)
-                            pass
-                    
-                else:
-                    
-                    pass
+                            final_exp = ""
+                            for param in exp:
+                                if not self.check_sign(param):
+                                    final_exp += param
+
+                        final_prin += final_exp
+
             counter += 1
         if line[0] == "typeln(":
             print(final_prin)
