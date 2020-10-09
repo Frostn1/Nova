@@ -1,9 +1,10 @@
-var y = 16
-connec x = y + 4
-var z = y + 4
-typeln("x"x)
-typeln("z"z)
-y = 15
-typeln("x"x)
-typeln("z"z)
-x = 15
+var age = 16 
+connec agee = age + 1
+var ager = age + 1
+typeln("age"2 + age)
+typeln("agee"agee)
+typeln("ager"ager)
+age = 20
+typeln("age"age)
+typeln("agee"agee)
+typeln("ager"ager)

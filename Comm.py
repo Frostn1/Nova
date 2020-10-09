@@ -301,11 +301,11 @@ class Parser:
                 state = 0
                 final_prin += param[param.index(";")+1:]
                 
-            elif "VAR" in param or "CONNEC" in param:
+            # elif "VAR" in param or "CONNEC" in param:
                 
-                state = 0
-                sum = str(eval(str(self.calc(self.varss[param[param.index(";")+1:]].carry)).replace("]",")").replace("[","(").replace(",","").replace("'","")))
-                final_prin += sum
+            #     state = 0
+            #     sum = str(eval(str(self.calc(self.varss[param[param.index(";")+1:]].carry)).replace("]",")").replace("[","(").replace(",","").replace("'","")))
+            #     final_prin += sum
                 
             else:
                 
@@ -314,16 +314,24 @@ class Parser:
                         i = counter +1
                         
                         state = 1
-                        while "STR" not in line[i] and "VAR" not in line[i] and "CONNEC" not in line[i] and i < len(line)-1:
-                            
-                            if ";" in line[i]:
+                        while "STR" not in line[i]  and i < len(line)-1:
+                            if "VAR" in line[i]:
+                                
+                                try:
+                                    exp += str(eval(str(self.calc(self.varss[line[i][line[i].index(";")+1:]].carry)).replace("]",")").replace("[","(").replace(",","").replace("'","")))
+                                except:
+                                    print("PROBLEM")
+                            elif ";" in line[i]:
                                 exp += line[i][line[i].index(";")+1:]
                             else:
                                 exp += line[i]
                             i += 1
-                        
-                        final_prin += str(eval(exp))
-                        exp = ""
+                        try:
+                            final_prin += str(eval(exp))
+                            exp = ""
+                        except:
+                            final_prin += str(exp)
+                            pass
                     
                 else:
                     
