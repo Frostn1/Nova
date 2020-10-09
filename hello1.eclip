@@ -1,8 +1,10 @@
 var age = 16 
 connec agee = age + 1
 var ager = age + 1
-typeln("age"2 + age)
-typeln("agee"agee)
+$Comment
+$This Comment
+typeln("age"age)
+typeln("agee"agee)$This
 typeln("ager"ager)
 age = 20
 typeln("age"age)

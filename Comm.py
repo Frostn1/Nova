@@ -265,6 +265,7 @@ class Parser:
         self.varss = varss
         self.line_counter = 0
     def run(self):
+        print(self.tokens)
         for line in self.tokens:
             self.execute(line) 
             self.line_counter += 1
@@ -342,6 +343,7 @@ class Parser:
         elif line[0] == "type(":
             print(final_prin,end="")
     def alter_var(self,line):
+        
         if len(line) < 3:
             raise Exception(ERROR_NAME + " Error: To few of arguments given.")
         elif line[1] != "=":
@@ -372,7 +374,7 @@ class Parser:
                 self.varss[line[0][line[0].index(";")+1:]].carry = final_carry
         
     def execute(self,line):
-        # print(line)
+        
         if len(line) < 1:
             pass
         elif line[0] == "type(" or line[0] == "typeln(":
