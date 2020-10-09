@@ -274,7 +274,7 @@ class Parser:
         for word in list_:
             
             if "VAR" in word or "CONNEC" in word:
-                sum.append(self.calc(self.varss[word[word.index(";")+1:]]))
+                sum.append(self.calc(self.varss[word[word.index(";")+1:]].carry))
             else:
                 try:
                     sum.append(word[word.index(";")+1:])
@@ -288,48 +288,91 @@ class Parser:
             if sign == toke:
                 return sign
         return False
-    def execute(self,line):
-        if line[0] == "type(" or line[0] == "typeln(":
-            final_prin = ""
-            counter = 0
-            state = 0
-            exp = ""
-            i = 0
-            for param in line[1:]:
+    def typing(self,line):
+        final_prin = ""
+        counter = 0
+        state = 0
+        exp = ""
+        i = 0
+        sum = 0
+        for param in line[1:]:
+            
+            if "STR" in param:
+                state = 0
+                final_prin += param[param.index(";")+1:]
                 
-                if "STR" in param:
-                    state = 0
-                    final_prin += param[param.index(";")+1:]
+            elif "VAR" in param or "CONNEC" in param:
+                
+                state = 0
+                sum = str(eval(str(self.calc(self.varss[param[param.index(";")+1:]].carry)).replace("]",")").replace("[","(").replace(",","").replace("'","")))
+                final_prin += sum
+                
+            else:
+                
+                if state == 0:
+                    if not self.check_sign(param):
+                        i = counter +1
+                        
+                        state = 1
+                        while "STR" not in line[i] and "VAR" not in line[i] and "CONNEC" not in line[i] and i < len(line)-1:
+                            
+                            if ";" in line[i]:
+                                exp += line[i][line[i].index(";")+1:]
+                            else:
+                                exp += line[i]
+                            i += 1
+                        
+                        final_prin += str(eval(exp))
+                        exp = ""
                     
-                elif "VAR" in param or "CONNEC" in param:
-                    state = 0
-                    print("Var")
                 else:
                     
-                    if state == 0:
-                        if not self.check_sign(param):
-                            i = counter +1
-                            
-                            state = 1
-                            while "STR" not in line[i] and "VAR" not in line[i] and "CONNEC" not in line[i] and i < len(line)-1:
-                                
-                                if ";" in line[i]:
-                                    exp += line[i][line[i].index(";")+1:]
-                                else:
-                                    exp += line[i]
-                                i += 1
-                            
-                            final_prin += str(eval(exp))
-                            exp = ""
-                        
+                    pass
+            counter += 1
+        if line[0] == "typeln(":
+            print(final_prin)
+        elif line[0] == "type(":
+            print(final_prin,end="")
+    def alter_var(self,line):
+        if len(line) < 3:
+            raise Exception(ERROR_NAME + " Error: To few of arguments given.")
+        elif line[1] != "=":
+            raise Exception(ERROR_NAME + " Error: Assigment sign has not been found.")
+        else:
+            if self.varss[line[0][line[0].index(";")+1:]].type == "connec":
+                raise Exception(ERROR_NAME + " Error: Cant modify a CONNEC var, as its a CONST.")
+            else:
+                new_carry = ""
+                new_type = ""
+                final_carry = []
+                for word in line[2:]:
+                    if "VAR" in word:
+                        new_carry += str(eval(str(self.calc(self.varss[word[word.index(";")+1:]].carry)).replace("]",")").replace("[","(").replace(",","").replace("'","")))
                     else:
-                        
-                        pass
-                counter += 1
-            if line[0] == "typeln(":
-                print(final_prin)
-            elif line[0] == "type(":
-                print(final_prin,end="")
+                        new_carry += str(word[word.index(";")+1:])
+                try:
+                    new_carry = eval(new_carry)
+                    if isinstance(new_carry,float):
+                        new_type = "FLOAT;"
+                    elif isinstance(new_carry,int):
+                        new_type = "INT;"
+                except:
+                    new_type = "STR;"
+                
+                    
+                final_carry.append(new_type + str(new_carry))
+                self.varss[line[0][line[0].index(";")+1:]].carry = final_carry
+        
+    def execute(self,line):
+        # print(line)
+        if len(line) < 1:
+            pass
+        elif line[0] == "type(" or line[0] == "typeln(":
+            self.typing(line)
+        elif line[0] == "var" or line[0] == "connec":
+            pass
+        elif line[0][line[0].index(";")+1:] in sorted(self.varss.keys(), key=len, reverse=True):
+            self.alter_var(line)
         
 
 def check_file(file_t):

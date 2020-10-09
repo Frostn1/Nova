@@ -1,0 +1,9 @@
+var y = 16
+connec x = y + 4
+var z = y + 4
+typeln("x"x)
+typeln("z"z)
+y = 15
+typeln("x"x)
+typeln("z"z)
+x = 15
