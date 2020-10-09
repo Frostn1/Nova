@@ -83,10 +83,8 @@ class Lexer:
 
         sum = []
         for word in list_:
-            print("Word",word)
+            
             if "VAR" in word or "CONNEC" in word:
-                
-                
                 sum.append(self.calc(self.varss[word[word.index(";")+1:]]))
             else:
                 try:
@@ -108,39 +106,64 @@ class Lexer:
         if self.toke == " ":
             self.toke = ""
             return self.tokens
-        if self.toke[0] == '"' and self.toke[len(self.toke)-1] == '"' and len(self.toke) > 1:
-            self.tokens[len(self.tokens)-1].append("STR;"+self.toke.replace('"',""))
-            self.toke = ""
-            return self.tokens
+        if len(self.toke) > 1:
+            if self.toke[0] == '"' and self.toke[len(self.toke)-1] == '"' and len(self.toke) > 1:
+                self.tokens[len(self.tokens)-1].append("STR;"+self.toke.replace('"',""))
+                self.toke = ""
+                return self.tokens
         
-        if self.check_sign(self.current_letter) or self.counter == len(self.text[self.line_counter])-1 and self.toke[:-1].replace(".","").isnumeric():
+        if self.check_sign(self.current_letter) or self.counter == len(self.text[self.line_counter])-1 and (self.toke[:-1].replace(".","").isnumeric() or self.toke.replace(".","").isnumeric()) or self.toke.replace(" ","")[-1] == '"' and len(self.toke.replace(" ","")) > 1:
             
+
             if self.toke[:-1].replace(" ","").count(".") == 1:
                 if self.check_sign(self.toke[-1]):
                     self.tokens[len(self.tokens)-1].append("FLOAT;"+self.toke[:-1].replace(" ",""))
+                    
                 else:
                     self.tokens[len(self.tokens)-1].append("FLOAT;"+self.toke.replace(" ",""))
-                            
-            elif self.toke[:-1].replace(" ","").isnumeric():
-                if self.check_sign(self.toke[-1]):
-                    self.tokens[len(self.tokens)-1].append("INT;"+self.toke[:-1].replace(" ",""))
-                else:
-                    self.tokens[len(self.tokens)-1].append("INT;"+self.toke.replace(" ",""))
-
-            if self.check_sign(self.toke[-1]):
-                
-                if self.toke.replace(" ","")[:-1] in sorted(self.varss, key=len, reverse=True):
                     
-                    self.tokens[len(self.tokens)-1].append("VAR;"+self.toke.replace(" ","")[:-1])
-                self.tokens[len(self.tokens)-1].append(self.toke[-1])
+                            
+            elif self.toke.replace(" ","")[:-1].isnumeric() or self.toke.replace(" ","").isnumeric():
                 
-            self.toke = ""
+                if self.check_sign(self.toke[-1]) or self.toke[-1] == '"':
+                    
+
+                    self.tokens[len(self.tokens)-1].append("INT;"+self.toke[:-1].replace(" ",""))
+                    if self.toke[-1] == '"':
+                        self.toke = self.toke[-1]
+                    
+                        
+                   
+                else:
+                    
+                    self.tokens[len(self.tokens)-1].append("INT;"+self.toke.replace(" ",""))
+                    
+            try:
+                if self.check_sign(self.toke[-1]) or self.toke[-1] == '"':
+                    
+                    if self.toke.replace(" ","")[:-1] in sorted(self.varss, key=len, reverse=True):
+                        if self.toke[-1] == '"':
+                            self.tokens[len(self.tokens)-1].append("VAR;"+self.toke.replace(" ","")[:-1])
+                            self.toke = self.toke[-1]
+                        else:
+                            self.tokens[len(self.tokens)-1].append("VAR;"+self.toke.replace(" ","")[:-1])
+                            self.tokens[len(self.tokens)-1].append(self.toke[-1])
+                            self.toke = ""
+                    else:
+                        if self.check_sign(self.toke[-1]):
+                            self.tokens[len(self.tokens)-1].append(self.toke[-1])
+                            self.toke = ""
+                else:
+                    self.toke = ""
+            except:
+                pass
+            
             return self.tokens
 
         #Create a Var section
         
         
-        if len(self.tokens[self.line_counter]) > 0:
+        if len(self.tokens) > self.line_counter and len(self.tokens[self.line_counter]) > 0:
             if self.tokens[self.line_counter][0] == "var" or self.tokens[self.line_counter][0] == "connec":
 
                 var_t_type = self.tokens[self.line_counter][0]
@@ -198,7 +221,7 @@ class Lexer:
                         if self.check_sign(toke_t[-1]):
                             if toke_t.replace(" ","")[:-1] in sorted(self.varss, key=len, reverse=True):
                                 if var_t_type == "connec":
-                                    var_t_tokens.append("CONNEC;"+toke_t)
+                                    var_t_tokens.append("CONNEC;"+toke_t.replace(" ","")[:-1])
                                 elif var_t_type == "var":
                                     
                                     try:
@@ -228,17 +251,86 @@ class Lexer:
                     else:
                         self.varss[var_t_name] = Var(var_t_name,var_t_tokens,var_t_type)
                 except Exception as e:
-                    print(e)
+                    pass
                 
                 self.tokens[len(self.tokens)-1].append(var_t_name)
                 self.toke = ""
-                return "con"
-                
-                
-                
+                return "con"  
         return self.tokens
         
        
+class Parser:
+    def __init__(self,tokens,varss):
+        self.tokens = tokens[:-1]
+        self.varss = varss
+        self.line_counter = 0
+    def run(self):
+        for line in self.tokens:
+            self.execute(line) 
+            self.line_counter += 1
+    def calc(self,list_):
+
+        sum = []
+        for word in list_:
+            
+            if "VAR" in word or "CONNEC" in word:
+                sum.append(self.calc(self.varss[word[word.index(";")+1:]]))
+            else:
+                try:
+                    sum.append(word[word.index(";")+1:])
+                except:
+                    sum.append(word)
+                    pass
+        return sum
+    def check_sign(self,toke):
+        self.sign_list = ["+","-","*","/","^","(",")","="]
+        for sign in self.sign_list:
+            if sign == toke:
+                return sign
+        return False
+    def execute(self,line):
+        if line[0] == "type(" or line[0] == "typeln(":
+            final_prin = ""
+            counter = 0
+            state = 0
+            exp = ""
+            i = 0
+            for param in line[1:]:
+                
+                if "STR" in param:
+                    state = 0
+                    final_prin += param[param.index(";")+1:]
+                    
+                elif "VAR" in param or "CONNEC" in param:
+                    state = 0
+                    print("Var")
+                else:
+                    
+                    if state == 0:
+                        if not self.check_sign(param):
+                            i = counter +1
+                            
+                            state = 1
+                            while "STR" not in line[i] and "VAR" not in line[i] and "CONNEC" not in line[i] and i < len(line)-1:
+                                
+                                if ";" in line[i]:
+                                    exp += line[i][line[i].index(";")+1:]
+                                else:
+                                    exp += line[i]
+                                i += 1
+                            
+                            final_prin += str(eval(exp))
+                            exp = ""
+                        
+                    else:
+                        
+                        pass
+                counter += 1
+            if line[0] == "typeln(":
+                print(final_prin)
+            elif line[0] == "type(":
+                print(final_prin,end="")
+        
 
 def check_file(file_t):
 
@@ -265,14 +357,19 @@ def read_file(file_t):
 def lex(text):
     lexer_t = Lexer(text) 
     lexer_t.run()
-    for key in lexer_t.varss.keys():
-        print(lexer_t.varss[key].name,lexer_t.varss[key].carry)
-    print(lexer_t.tokens)
-    # print(lexer_t.varss)
+    # for key in lexer_t.varss.keys():
+    #     print(lexer_t.varss[key].name,lexer_t.varss[key].carry)
+    # print(lexer_t.tokens)
+    
+    return lexer_t.tokens, lexer_t.varss
+def parse(tokens,varss):
+    parser_t = Parser(tokens,varss)
+    parser_t.run()
 def run(file_to_run):
     
     check_file(file_to_run)
-    lex(read_file(file_to_run))
+    tokens,varss = lex(read_file(file_to_run))
+    parse(tokens,varss)
     
 
 if __name__ == "__main__":

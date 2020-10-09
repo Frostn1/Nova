@@ -1,8 +1,0 @@
-var age = 12
-var agee = age + 2
-var ager =  agee + 1
-type(age)
-type(ager)
-age = 13
-type(age)
-type(ager)
