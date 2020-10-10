@@ -1,8 +1,0 @@
-var name = "Discord"
-link newname = name + "Hello"
-
-typeln(newname)
-name = "Yes"
-typeln(newname)
-
-

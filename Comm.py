@@ -11,12 +11,10 @@ class Var:
         self.name = name
         self.carry = carry
         self.type = type_
+        self.callback = []
     
     
-    def get_type(self):
-        return self.type
-    def get_carry(self):
-        return self.carry
+    
 
 class Lexer:
     def __init__(self,text):
@@ -180,7 +178,6 @@ class Lexer:
                 if var_t_name in self.varss.keys():
                     raise Exception (ERROR_NAME+" Error: Var name '"+var_t_name+"',Has been manufactored before and can not again")
                 else:
-                    
                     for number in ["1","2","3","4","5","6","7","8","9","0"]:
                         if number in var_t_name:
         
@@ -212,6 +209,9 @@ class Lexer:
                                 var_t_tokens.append("INT;"+toke_t[:-1].replace(" ",""))
                             else:
                                 var_t_tokens.append("INT;"+toke_t.replace(" ",""))
+                        else:
+                            if toke_t not in sorted(self.varss.keys(), key=len, reverse=True):
+                                raise Exception(ERROR_NAME+" Error: Var used without being manufactored")
                         if self.check_sign(toke_t[-1]):
                              
                             if toke_t.replace(" ","")[:-1] in sorted(self.varss.keys(), key=len, reverse=True):
@@ -234,6 +234,8 @@ class Lexer:
 
                                     # var_t_tokens.append("VAR;"+toke_t)
                                     # var_t_tokens.append()
+                            
+                                
                             var_t_tokens.append(toke_t[-1])
                             toke_t = ""
                         elif counter_t == len(var_t_carry) and var_t_type == LINKED_VAR_NAME and toke_t in sorted(self.varss.keys(), key=len, reverse=True):
@@ -437,7 +439,7 @@ def read_file(file_t):
             if letter[len(letter)-1] == "\n":
                 letter = letter[:len(letter)-1]
             new_text.append(letter)
-        if len(new_text) == 0:
+        if new_text == []:
             raise Exception(ERROR_NAME+" Error: File is empty")
         for line in new_text:
             if len(line) >= 1:

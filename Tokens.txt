@@ -1,9 +1,0 @@
-Official Tokens Eclipse Coding lang
------------------------------------
-
-type - Print the following string with no new line
-typeln - Print the following string with a new line
-var - Implements a creation of a new variable
-link - Implements a creation of a new variable thats is still connected to the vars who created it
-get - Input func
-$ - Comment symbol
