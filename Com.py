@@ -54,29 +54,6 @@ class Lexer:
             self.tokens.append([]) 
             check = ""
             
-        
-           
-
-    # def advance(self):
-    #     self.counter += 1
-    #     if self.line_counter < len(self.text)-1:
-    #         if self.counter >= len(self.text[self.line_counter]):
-    #             self.line_counter += 1
-    #             try:
-    #                 self.current_letter = self.text[self.line_counter][0]
-                    
-    #             except:
-    #                 pass
-    #             self.counter = 0
-    #             self.toke = ""
-    #         else:
-    #             self.current_letter = self.text[self.line_counter][self.counter]
-    #         self.toke += self.current_letter
-    #     else:
-    #         if self.counter < len(self.text[self.line_counter]):
-    #             self.current_letter = self.text[self.line_counter][self.counter]
-    #             self.toke += self.current_letter
-
     def check_sign(self,toke):
         self.sign_list = ["+","-","*","/","^","(",")","="]
         for sign in self.sign_list:
@@ -110,8 +87,12 @@ class Lexer:
             
         elif  (self.tokens[len(self.tokens)-1] == [REGULAR_VAR_NAME] or self.tokens[len(self.tokens)-1] == [LINKED_VAR_NAME]) and self.toke not in sorted(self.varss,key=len,reverse=True) and len(self.toke.replace(" ","")) > 0:
             
-            self.varss[self.toke.replace(" ","")] = Var(self.toke,[],self.tokens[len(self.tokens)-1])
-            self.tokens[len(self.tokens)-1].append(self.toke.replace(" ",""))
+            if self.check_sign(self.toke[-1]):
+                self.varss[self.toke.replace(" ","")] = Var(self.toke[:-1],[],self.tokens[len(self.tokens)-1])
+                self.tokens[len(self.tokens)-1].append(self.toke.replace(" ","")[:-1])
+            else:
+                self.varss[self.toke.replace(" ","")] = Var(self.toke,[],self.tokens[len(self.tokens)-1])
+                self.tokens[len(self.tokens)-1].append(self.toke.replace(" ",""))
             self.flag = 1
         elif len(self.toke.strip()) > 1 and self.toke.lstrip()[0] == '"' and (self.toke[-1] == '"' or self.toke[-2] == '"'):
             if self.check_sign(self.toke.strip()[-1]):
