@@ -1,0 +1,12 @@
+var age = 555 + 655.2
+link agee = age - 2
+age = "Sean Dahan" + "Yep"
+var name
+typeln(agee)
+get(agee)
+when(age # agee):
+    typeln("age is the same as agee")
+    typeln("What is your name then?")
+    get(name)
+    typeln("Nice to meet you " name)
+end

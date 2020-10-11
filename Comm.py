@@ -210,7 +210,8 @@ class Lexer:
                             else:
                                 var_t_tokens.append("INT;"+toke_t.replace(" ",""))
                         else:
-                            if toke_t not in sorted(self.varss.keys(), key=len, reverse=True):
+                            if not self.check_sign(toke_t.replace(" ","")[-1]) and toke_t not in sorted(self.varss.keys(), key=len, reverse=True):
+                                print(toke_t)
                                 raise Exception(ERROR_NAME+" Error: Var used without being manufactored")
                         if self.check_sign(toke_t[-1]):
                              
