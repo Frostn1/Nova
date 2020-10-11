@@ -10,3 +10,5 @@ when(age # agee):
     get(name)
     typeln("Nice to meet you " name)
 end
+typeln("Yep" "Hmm")
+$ This is a comment
