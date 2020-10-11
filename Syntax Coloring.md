@@ -9,3 +9,4 @@
 * __strong__ *Bold_White*
 * __support.class__ *Aqua*
 * __support.function__ *Yellow*
+* __constant.numeric__ *Light_Green*

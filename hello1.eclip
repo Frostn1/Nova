@@ -1,1 +1,10 @@
-var age = 555 + 655.2
+var age = 16
+link newage = age + 1
+typeln(newage)
+typeln("What is your age?")
+get(age)
+typeln(newage)
+when(age # newage):
+    typeln("WILL NEVER HAPPEN")
+end
+
