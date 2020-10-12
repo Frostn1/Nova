@@ -74,18 +74,18 @@ class Lexer:
                     pass
         return sum
     def check_toke(self):
-        print(self.tokens,self.toke + "__")
+        
         type_t = ""
         self.flag = 0
         if self.toke.replace(" ","") in self.key_words or (self.toke.replace(" ","")[:-1] in self.key_words and self.counter != len(self.text[self.line_counter])-1):
             if self.check_sign(self.toke.replace(" ","")[-1]):
                 if self.toke.replace(" ","")[:-1] == "Vector":
-                    print("YEP1")
+                    
                     self.vector_state = True
                 self.tokens[len(self.tokens)-1].append(self.toke.replace(" ","")[:-1])
             else:
                 if self.toke.replace(" ","") == "Vector":
-                    print("YEP")
+                    
                     self.vector_state = True
                 self.tokens[len(self.tokens)-1].append(self.toke.replace(" ",""))
             self.flag = 1
@@ -134,7 +134,7 @@ class Lexer:
             self.flag = 1
         try: 
             if self.toke[-1] != " " and bool(self.check_sign(self.toke.replace(" ","")[-1])):
-                print(self.toke)
+                
                 self.tokens[len(self.tokens)-1].append(self.toke.replace(" ","")[-1])
                 self.flag = 1
         except:

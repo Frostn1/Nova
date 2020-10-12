@@ -51,7 +51,10 @@ class Parser:
             if sign == toke:
                 return sign
         return False
-
+    def check_callback(self,var_name):
+        for key in self.varss[var_name].callback.keys():
+            print(key,self.varss[var_name].callback[key])
+        
     def typing(self,line):
         final_prin = ""
         counter = 0
@@ -103,7 +106,7 @@ class Parser:
             print(final_prin,end="")
 
     def alter_var(self,line):
-        print(line)
+        
         if len(line) < 3:
             raise Exception(ERROR_NAME + " Error: To few of arguments given.",self.line_counter)
         elif line[1] != "=":
@@ -145,6 +148,7 @@ class Parser:
                 
                 self.varss[line[0][line[0].index(";")+1:]].carry = final_carry
                 self.varss[line[0][line[0].index(";")+1:]].created = True
+                self.check_callback(line[0][line[0].index(";")+1:])
 
     def input_data(self,line):
         if len(line) != 4:
@@ -168,38 +172,36 @@ class Parser:
                         new_type = "STR;"
                     final_carry.append(new_type + str(inp))
                     self.varss[line[2][line[2].index(";")+1:]].carry = final_carry
+                    self.check_callback(line[0][line[0].index(";")+1:])
                 else:
                     raise Exception(ERROR_NAME + " Error: Cant modify a "+ LINKED_VAR_NAME +" var, as its a CONST.",self.line_counter)
             else:
                 raise Exception(ERROR_NAME + " Error: The Var given to the get function hasnt been manufactored yet.",self.line_counter)
     def when_state(self,line):
         self.when_flag = True
-        self.when_line = self.line_counter
-        if_section = ""
-        self.vars_when = []
+        
         if "when" in line[0]:
-            print("THIUS LINE",line[2:-2])
+            self.when_line_num = self.line_counter
+            self.if_section = ""
+            self.vars_when = []
+            self.when_lines = []
             for word in line[2:-2]:
-                
-                if word == "#":
-                        if_section += word.replace("#","==")
-                if word != " " and word[word.index(";")+1:] in sorted(self.varss,key=len,reverse=True):
-                    if_section += word[word.index(";")+1:]
-                    self.vars_when.append(word[word.index(";")+1:])
-                
-                    
-                        
-            
-            print("First line")
-            print(self.vars_when)
-            print("YEP",if_section)
-            
+                if word != " ":
+                    if word == "#":
+                            self.if_section += word.replace("#","==")
+                    if word != " " and ";" in word and word[word.index(";")+1:] in sorted(self.varss,key=len,reverse=True):
+                        self.if_section += word[word.index(";")+1:]
+                        self.vars_when.append(word[word.index(";")+1:])  
         else:
-            print("Nope",line)
-        # print("When statement",line)
+            
+            self.when_lines.append(line)
+            
     def end_state(self,line):
         self.when_flag = False
-        print("End statement",line)
+        
+        for var in self.vars_when:
+            self.varss[var].callback[self.if_section] = self.when_lines
+
     def execute(self,line):
         
         if len(line) < 1:

@@ -6,6 +6,6 @@ class Var:
         self.type = type_
         self.callback = {}
         self.created = False
-
+    
 class Vector:
     pass
