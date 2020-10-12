@@ -111,10 +111,11 @@ class Lexer:
             else:
                 self.tokens[len(self.tokens)-1].append("VAR;" + self.toke.replace(" ",""))
             self.flag = 1
-        elif self.toke.replace(" ","").isnumeric():
-            
-            self.tokens[len(self.tokens)-1].append("INT;" + self.toke.replace(" ",""))
-            
+        elif self.toke.replace(" ","").isnumeric() or self.toke[:-1].replace(" ","").isnumeric():
+            if self.toke.replace(" ","").isnumeric():
+                self.tokens[len(self.tokens)-1].append("INT;" + self.toke.replace(" ",""))
+            else:
+                self.tokens[len(self.tokens)-1].append("INT;" + self.toke.replace(" ","")[:-1])
             self.flag = 1
         elif self.toke.replace(" ","").count(".") == 1:
             self.tokens[len(self.tokens)-1].append("FLOAT;" + self.toke.replace(" ",""))
@@ -173,6 +174,7 @@ class Parser:
             if sign == toke:
                 return sign
         return False
+
     def typing(self,line):
         final_prin = ""
         counter = 0
@@ -193,13 +195,19 @@ class Parser:
                         
                         state = 1
                         while "STR" not in line[i]  and i < len(line)-1:
+                            
                             if "VAR" in line[i] or "LINK" in line[i]:
                                 
                                 exp.append(self.calc(self.varss[line[i][line[i].index(";")+1:]].carry))
+                            elif "INT" in line[i] or "FLOAT" in line[i]:
+                                exp.append(line[i][line[i].index(";")+1:])
+                            else:
+                                exp.append(line[i])
                             i += 1
                         
                         exp = self.simplify(exp,[])
                         for param in exp:
+                            
                             final_exp += param
                         try:
                             final_exp = str(eval(final_exp))
@@ -237,6 +245,7 @@ class Parser:
                 new_type = ""
                 final_carry = []
                 for word in line[2:]:
+                    
                     if "VAR" in word:
                         new_carry += str(eval(str(self.calc(self.varss[word[word.index(";")+1:]].carry)).replace("]",")").replace("[","(").replace(",","").replace("'","")))
                     else:
@@ -256,6 +265,7 @@ class Parser:
                 
                     
                 final_carry.append(new_type + str(new_carry))
+                
                 self.varss[line[0][line[0].index(";")+1:]].carry = final_carry
                 self.varss[line[0][line[0].index(";")+1:]].created = True
 

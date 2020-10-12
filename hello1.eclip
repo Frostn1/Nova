@@ -1,8 +1,9 @@
 var age = 16 + 12
 link newage = 17 + age
 age = 15
+var agee = (1+2)*4
 typeln(newage)
 typeln(age)
 typeln("What is your age?")
 get(age)
-typeln(age)
+typeln(agee)
