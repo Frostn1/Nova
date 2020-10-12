@@ -1,9 +1,10 @@
-var age = 16 + 12
-link newage = 17 + age
-age = 15
-var agee = (1+2)*4
-typeln(newage)
-typeln(age)
-typeln("What is your age?")
-get(age)
-typeln(agee)
+var age = 1
+var agee = 2
+when(age # agee):
+    typeln("Age got changed")
+    typeln("Hello World")
+end
+typeln("First")
+age = 2
+
+
