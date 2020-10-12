@@ -7,7 +7,10 @@ REGULAR_VAR_NAME = "var"
 
 class Parser:
     def __init__(self,tokens,varss):
-        self.tokens = tokens[:-1]
+        if tokens[-1] == []:
+            self.tokens = tokens[:-1]
+        else:
+            self.tokens = tokens
         self.varss = varss
         self.line_counter = 0
         self.when_flag = False
@@ -51,9 +54,54 @@ class Parser:
             if sign == toke:
                 return sign
         return False
+
     def check_callback(self,var_name):
+        current_toke = ""
+        current_counter = 0
+        final_carry = []
         for key in self.varss[var_name].callback.keys():
-            print(key,self.varss[var_name].callback[key])
+            final_carry = []
+            # print(key,self.varss[var_name].callback[key])
+            for letter in key:
+                
+                current_toke += letter
+                current_counter += 1
+                if self.check_sign(letter) or len(key) == current_counter:
+                    # print("Toke",current_toke)
+                    if current_toke[:-1] in sorted(self.varss,key=len,reverse=True):
+                        line = self.varss[current_toke[:-1]].carry
+                        new_carry = ""
+                        
+                        
+                        # print("LINE",line)
+                        for word in line:
+                            
+                            if "VAR" in word:
+                                new_carry += str(eval(str(self.calc(self.varss[word[word.index(";")+1:]].carry)).replace("]",")").replace("[","(").replace(",","").replace("'","")))
+                            else:
+                                
+                                try:
+                                    new_carry += str(word[word.index(";")+1:])
+                                except:
+                                    new_carry += str(word)
+                        try:
+                            new_carry = eval(new_carry)
+                        except:
+                            pass
+                            
+                        final_carry.append(str(new_carry))
+                        if self.check_sign(current_toke[-1]):
+                            final_carry.append(str(current_toke[-1]))
+                        current_toke = ""
+                    elif self.check_sign(letter):
+                        final_carry += letter
+                        current_toke = ""
+            if bool("".join(final_carry)):
+                parser_t = Parser(self.varss[var_name].callback[key],self.varss)
+                parser_t.run()        
+            
+       
+
         
     def typing(self,line):
         final_prin = ""
