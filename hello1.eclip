@@ -1,10 +1,8 @@
-var age = 16
-link newage = age + 1
+var age = 16 + 12
+link newage = 17 + age
+age = 15
 typeln(newage)
+typeln(age)
 typeln("What is your age?")
 get(age)
-typeln(newage)
-when(age # newage):
-    typeln("WILL NEVER HAPPEN")
-end
-
+typeln(age)
