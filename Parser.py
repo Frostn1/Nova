@@ -61,19 +61,20 @@ class Parser:
         final_carry = []
         for key in self.varss[var_name].callback.keys():
             final_carry = []
-            # print(key,self.varss[var_name].callback[key])
+            
             for letter in key:
                 
                 current_toke += letter
                 current_counter += 1
                 if self.check_sign(letter) or len(key) == current_counter:
-                    # print("Toke",current_toke)
-                    if current_toke[:-1] in sorted(self.varss,key=len,reverse=True):
-                        line = self.varss[current_toke[:-1]].carry
+
+                    if current_toke[:-1] in sorted(self.varss,key=len,reverse=True) or current_toke in sorted(self.varss,key=len,reverse=True):
+                        if current_toke in sorted(self.varss,key=len,reverse=True):
+                            line = self.varss[current_toke].carry
+                        elif current_toke[:-1] in sorted(self.varss,key=len,reverse=True):
+                            line = self.varss[current_toke[:-1]].carry
                         new_carry = ""
                         
-                        
-                        # print("LINE",line)
                         for word in line:
                             
                             if "VAR" in word:
@@ -96,12 +97,11 @@ class Parser:
                     elif self.check_sign(letter):
                         final_carry += letter
                         current_toke = ""
-            if bool("".join(final_carry)):
+            if eval("".join(final_carry)):
+                
                 parser_t = Parser(self.varss[var_name].callback[key],self.varss)
                 parser_t.run()        
             
-       
-
         
     def typing(self,line):
         final_prin = ""

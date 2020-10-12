@@ -2,14 +2,15 @@ var age = 1
 var agee = 2
 var num = 0
 typeln(num)
-when(age # agee):
+when(age):
     typeln("Age got changed")
     typeln("Hello World")
     typeln("Discord")
+    
     num = 1
 end
 typeln("First")
-age = 2
+
 typeln(num)
 
 
