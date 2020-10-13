@@ -41,7 +41,7 @@ class Lexer:
                 # print(self.toke,"TOKEN")
                 self.toke += letter
                 
-                if self.check_sign(str(letter)) or letter == " " or self.counter == len(line)-1:
+                if (self.check_sign(str(letter)) or letter == " " or self.counter == len(line)-1) and line[0] != "$":
                     
                     check = self.check_toke()
                 self.counter += 1

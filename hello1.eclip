@@ -2,15 +2,22 @@ var age = 1
 var agee = 2
 var num = 0
 typeln(num)
-when(age):
+when(age # agee):
+   
+    
     typeln("Age got changed")
     typeln("Hello World")
     typeln("Discord")
-    
     num = 1
-end
-typeln("First")
 
+end
+$dadad
+$dadad
+$dadad
+agee = 1
+typeln("First")
 typeln(num)
+typeln(name)
+Vector
 
 
