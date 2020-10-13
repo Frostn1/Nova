@@ -32,6 +32,7 @@ class Lexer:
         self.tokens = [[]]
         self.varss = {}
         self.vector_state = False
+        self.vectors = {}
     
     def run(self):
 
@@ -50,10 +51,12 @@ class Lexer:
             self.counter = 0
             self.tokens.append([])
             self.vector_state = False 
+            
             check = ""
+        print(self.tokens)
         
     def check_sign(self,toke):
-        self.sign_list = ["+","-","*","/","^","(",")","=","#"]
+        self.sign_list = ["+","-","*","/","^","(",")","=","#",","]
         for sign in self.sign_list:
             if sign == toke:
                 return sign
@@ -78,18 +81,35 @@ class Lexer:
         type_t = ""
         self.flag = 0
         if self.toke.replace(" ","") in self.key_words or (self.toke.replace(" ","")[:-1] in self.key_words and self.counter != len(self.text[self.line_counter])-1):
+            
             if self.check_sign(self.toke.replace(" ","")[-1]):
+                
                 if self.toke.replace(" ","")[:-1] == "Vector":
-                    
-                    self.vector_state = True
+                    self.vectors[self.tokens[len(self.tokens)-1][1]] = ""
+                    if self.tokens[len(self.tokens)-1][0] == LINKED_VAR_NAME:
+                        self.vector_state = True
                 self.tokens[len(self.tokens)-1].append(self.toke.replace(" ","")[:-1])
             else:
+                
                 if self.toke.replace(" ","") == "Vector":
+                    self.vectors[self.tokens[len(self.tokens)-1][1]] = ""
+                    if self.tokens[len(self.tokens)-1][0] == LINKED_VAR_NAME:
+                        self.vector_state = True
                     
-                    self.vector_state = True
+                    
                 self.tokens[len(self.tokens)-1].append(self.toke.replace(" ",""))
             self.flag = 1
             
+        elif self.vector_state and self.toke != " ":
+            if self.check_sign(self.toke.replace(" ","")[-1]) and len(self.toke[:-1]) > 0:
+                
+                self.tokens[len(self.tokens)-1].append("ARG;"+self.toke.replace(" ","")[:-1])
+                print(self.tokens) 
+            elif not self.check_sign(self.toke.replace(" ","")):
+                
+                self.tokens[len(self.tokens)-1].append("ARG;"+self.toke.replace(" ",""))
+            self.flag = 1
+
         elif  (self.tokens[len(self.tokens)-1] == [REGULAR_VAR_NAME] or self.tokens[len(self.tokens)-1] == [LINKED_VAR_NAME]) and self.toke not in sorted(self.varss,key=len,reverse=True) and len(self.toke.replace(" ","")) > 0:
             
             if self.check_sign(self.toke[-1]):
@@ -126,12 +146,7 @@ class Lexer:
         elif self.toke.replace(" ","").count(".") == 1:
             self.tokens[len(self.tokens)-1].append("FLOAT;" + self.toke.replace(" ",""))
             self.flag = 1
-        elif self.vector_state:
-            if self.check_sign(self.toke[-1]):
-                self.tokens[len(self.tokens)-1].append("ARG;"+self.toke.replace(" ","")[:-1]) 
-            else:
-                self.tokens[len(self.tokens)-1].append("ARG;"+self.toke.replace(" ",""))
-            self.flag = 1
+        
         try: 
             if self.toke[-1] != " " and bool(self.check_sign(self.toke.replace(" ","")[-1])):
                 

@@ -38,20 +38,22 @@ def read_file(file_t):
 def lex(text):
     lexer_t = Lexer.Lexer(text) 
     lexer_t.run()
-    return lexer_t.tokens, lexer_t.varss
+    return lexer_t.tokens, lexer_t.varss, lexer_t.vectors
 
-def parse(tokens,varss):
+def parse(tokens,varss,vectors):
     parser_t = Parser.Parser(tokens,varss)
     parser_t.run()
 def run(file_to_run):
     
     check_file(file_to_run)
-    tokens,varss = lex(read_file(file_to_run))
+    tokens,varss,vectors = lex(read_file(file_to_run))
     
     # print(varss)
     # for var in varss.keys():
     #     print("HMMM",varss[var].name,varss[var].carry,varss[var].type)
-    parse(tokens,varss)
+    for key in vectors.keys():
+        print("HMM",key,vectors[key])
+    parse(tokens,varss,vectors)
     
 
 if __name__ == "__main__":

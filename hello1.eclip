@@ -1,23 +1,8 @@
-var age = 1
-var agee = 2
-var num = 0
-typeln(num)
-when(age # agee):
-   
-    
-    typeln("Age got changed")
-    typeln("Hello World")
-    typeln("Discord")
-    num = 1
+var m = 1
+var g = 2
+var f = 3
+var y = 4 
+var x = Vector(m * g, f * y)
 
-end
-$dadad
-$dadad
-$dadad
-agee = 1
-typeln("First")
-typeln(num)
-typeln(name)
-Vector
 
 
