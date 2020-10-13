@@ -1,9 +1,10 @@
+import random
 ERROR_NAME = "Goblin"
 COMPILER_NAME = "Commander"
 
 LINKED_VAR_NAME = "link"
 REGULAR_VAR_NAME = "var"
-
+ERRORS_FILE = ""
 
 class Parser:
     def __init__(self,tokens,varss):
@@ -15,6 +16,11 @@ class Parser:
         self.line_counter = 0
         self.when_flag = False
         self.when_line = 0
+        if ERRORS_FILE.strip() != "":
+            print("YAP")
+            with open(ERRORS_FILE,"r") as file1:
+                self.errors = file1.readlines()
+        
     def run(self):
         # for key in self.varss.keys():
         #     print("VAR",self.varss[key].carry,self.varss[key].type)
@@ -24,7 +30,7 @@ class Parser:
             self.execute(line) 
             self.line_counter += 1
         if self.when_flag:
-            raise SyntaxError(ERROR_NAME + " Error: When statement was not close by a 'end' statement at line " + str(self.when_line+1))
+            self.Error("When statement was not close by a 'end' statement at line ")
     def calc(self,list_):
 
         sum = []
@@ -54,11 +60,16 @@ class Parser:
             if sign == toke:
                 return sign
         return False
-
+    def Error(self,error_type):
+        if ERRORS_FILE.strip() != "":
+            raise Exception(self.errors[random.randint(0,len(self.errors)-1)]+ error_type)
+        else:
+            raise Exception(ERROR_NAME + " Error: " + error_type)
     def check_callback(self,var_name):
         current_toke = ""
         current_counter = 0
         final_carry = []
+        pre_vars = []
         for key in self.varss[var_name].callback.keys():
             final_carry = []
             
@@ -98,9 +109,13 @@ class Parser:
                         final_carry += letter
                         current_toke = ""
             if eval("".join(final_carry)):
-                
+                # print(self.varss.keys())
+                # for key in self.varss.keys():
+                #     pre_vars.append(key)
+                # print("PRE",pre_vars)
                 parser_t = Parser(self.varss[var_name].callback[key],self.varss)
-                parser_t.run()        
+                parser_t.run()
+                # print("PRE",pre_vars)        
             
         
     def typing(self,line):
@@ -156,13 +171,13 @@ class Parser:
     def alter_var(self,line):
         
         if len(line) < 3:
-            raise Exception(ERROR_NAME + " Error: To few of arguments given.",self.line_counter)
+            self.Error("To few of arguments given.")
         elif line[1] != "=":
-            raise Exception(ERROR_NAME + " Error: Assigment sign has not been found.",self.line_counter)
+            self.Error("Assigment sign has not been found.")
         else:
             if self.varss[line[0][line[0].index(";")+1:]].type == LINKED_VAR_NAME:
                 if self.varss[line[0][line[0].index(";")+1:]].created:
-                    raise Exception(ERROR_NAME + " Error: Cant modify a "+LINKED_VAR_NAME+" var, as its a CONST.",self.line_counter)
+                    self.Error("Cant modify a "+LINKED_VAR_NAME+" var, as its a CONST.")
                 else:
                     self.varss[line[0][line[0].index(";")+1:]].carry = line[2:]
                     self.varss[line[0][line[0].index(";")+1:]].created = True
@@ -200,7 +215,7 @@ class Parser:
 
     def input_data(self,line):
         if len(line) != 4:
-            raise Exception(ERROR_NAME + " Error: number of arguments given to the 'get' function is wrong.",self.line_counter)
+            self.Error("Number of arguments given to the 'get' function is wrong.")
         else:
             
             if line[2][line[2].index(";")+1:] in sorted(self.varss.keys(), key=len, reverse=True):
@@ -220,11 +235,12 @@ class Parser:
                         new_type = "STR;"
                     final_carry.append(new_type + str(inp))
                     self.varss[line[2][line[2].index(";")+1:]].carry = final_carry
-                    self.check_callback(line[0][line[0].index(";")+1:])
+                    
+                    self.check_callback(line[2][line[2].index(";")+1:])
                 else:
-                    raise Exception(ERROR_NAME + " Error: Cant modify a "+ LINKED_VAR_NAME +" var, as its a CONST.",self.line_counter)
+                    self.Error("Cant modify a "+ LINKED_VAR_NAME +" var, as its a CONST.")
             else:
-                raise Exception(ERROR_NAME + " Error: The Var given to the get function hasnt been manufactored yet.",self.line_counter)
+                self.Error("The Var given to the get function hasnt been manufactored yet.")
     def when_state(self,line):
         self.when_flag = True
         

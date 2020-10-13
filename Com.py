@@ -48,7 +48,7 @@ def run(file_to_run):
     check_file(file_to_run)
     tokens,varss,vectors = lex(read_file(file_to_run))
     
-    # print(varss)
+    print(varss)
     # for var in varss.keys():
     #     print("HMMM",varss[var].name,varss[var].carry,varss[var].type)
     for key in vectors.keys():

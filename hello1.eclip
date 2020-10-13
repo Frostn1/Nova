@@ -1,8 +1,13 @@
-var m = 1
-var g = 2
-var f = 3
-var y = 4 
-var x = Vector(m * g, f * y)
-
-
+var x = 1
+var z = 10
+link y = z
+when(x # y):
+typeln("YEP")
+var in = 5
+end
+get(x)
+z = 11
+x = 11
+typeln(x)
+type(in)
 
