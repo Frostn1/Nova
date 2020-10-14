@@ -1,19 +1,20 @@
 var x = 1
 var z = 2
-link y = z 
+link y = z
 
 when(x # y):
-
     typeln("YEP")
     var in = 5
+    var tm = 5
+    when(in # tm):
+        typeln("Hello")
+    end
+    
     typeln(in)
 end
 
-get(x)
 z = 11
 x = 11
 typeln(x)
 typeln("HEY")
 type(in)
-
-

@@ -15,12 +15,12 @@ class Parser:
             self.tokens = tokens
         self.varss = varss
         self.line_counter = 0
-        self.when_flag = False
+        self.when_flag = 0
         self.when_line = 0
         if semi != []:
             self.init_var(semi)
         if ERRORS_FILE.strip() != "":
-            print("YAP")
+            # print("YAP")
             with open(ERRORS_FILE,"r") as file1:
                 self.errors = file1.readlines()
     def init_var(self,varss):
@@ -36,6 +36,7 @@ class Parser:
             self.execute(line) 
             self.line_counter += 1
         if self.when_flag:
+            print("WHEN IS",self.when_flag)
             self.Error("When statement was not close by a 'end' statement at line ")
     def calc(self,list_):
 
@@ -76,8 +77,9 @@ class Parser:
         for key in self.varss.keys():
             print(key,self.varss[key].carry,self.varss[key].created)
         print("[End]")
+
     def check_callback(self,var_name):
-        # print("YCK")
+        print("YCK",var_name,self.varss[var_name].callback)
         current_toke = ""
         current_counter = 0
         final_carry = []
@@ -120,15 +122,17 @@ class Parser:
                     elif self.check_sign(letter):
                         final_carry += letter
                         current_toke = ""
-            # print("Final",final_carry)
+            print("Final",final_carry)
             if eval("".join(final_carry)):
-                # print(self.varss.keys())
-                # for key in self.varss.keys():
-                #     pre_vars.append(key)
-                # print("PRE",pre_vars)
-                # print("SEEMS")
+                print("IS TRUE")
+                pre_vars = self.varss.keys()
+                # print("PRE",pre_vars,var_name,key_)
+
                 parser_t = Parser(self.varss[var_name].callback[key],self.varss,[])
                 parser_t.run()
+                post_vars = parser_t.varss.keys()
+                
+                # print("POST",post_vars)
                 # print("PRE",pre_vars)        
             
         
@@ -183,7 +187,7 @@ class Parser:
             print(final_prin,end="")
 
     def alter_var(self,line,type_):
-        
+        # print("ALTERING VAR",line)
         if len(line) < 3:
             
             self.Error("To few of arguments given.")
@@ -264,9 +268,10 @@ class Parser:
             else:
                 self.Error("The Var given to the get function hasnt been manufactored yet.")
     def when_state(self,line):
-        self.when_flag = True
+        
         
         if "when" in line[0]:
+            print("YES")
             self.when_line_num = self.line_counter
             self.if_section = ""
             self.vars_when = []
@@ -278,21 +283,32 @@ class Parser:
                     if word != " " and ";" in word and word[word.index(";")+1:] in sorted(self.varss,key=len,reverse=True):
                         self.if_section += word[word.index(";")+1:]
                         self.vars_when.append(word[word.index(";")+1:])  
+            
         else:
             
             self.when_lines.append(line)
             
     def end_state(self,line):
-        self.when_flag = False
-        
-        for var in self.vars_when:
-            self.varss[var].callback[self.if_section] = self.when_lines
+        self.when_flag -= 1
+        # print("ENDING",self.when_flag)
+        # print("Lines",self.when_lines)
+        if self.when_flag == 0:
+            print("HMMMMMM",self.vars_when) 
+            for var in self.vars_when:
+                self.varss[var].callback[self.if_section] = self.when_lines
+            # print(var,self.varss[var].callback)
 
     def execute(self,line):
         
         if len(line) < 1:
             pass
+        elif line[0] == "when":
+            
+            self.when_flag += 1
+            # print("WHENNNN",self.when_flag)
+            self.when_state(line)
         elif self.when_flag and line != ["end"]:
+            # print("HMM I AM HERE",line)
             self.when_state(line)
         elif line[0] == "type" or line[0] == "typeln":
             self.typing(line)
@@ -300,9 +316,8 @@ class Parser:
             self.alter_var(line[1:],line[0])
         elif line[0] == "get":
            self.input_data(line)
-        elif line[0] == "when":
-            self.when_state(line)
         elif line[0] == "end":
+            
             self.end_state(line)
         elif line[0][line[0].index(";")+1:] in sorted(self.varss.keys(), key=len, reverse=True):
             self.alter_var(line,self.varss[line[0][line[0].index(";")+1:]].type)

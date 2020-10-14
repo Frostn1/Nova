@@ -38,6 +38,7 @@ def read_file(file_t):
 def lex(text):
     lexer_t = Lexer.Lexer(text) 
     lexer_t.run()
+    print(lexer_t.tokens)
     return lexer_t.tokens, lexer_t.varss, lexer_t.vectors,lexer_t.semi_vars
 
 def parse(tokens,varss,vectors,semi):
