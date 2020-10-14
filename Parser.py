@@ -1,4 +1,5 @@
 import random
+import Vars
 ERROR_NAME = "Goblin"
 COMPILER_NAME = "Commander"
 
@@ -65,14 +66,16 @@ class Parser:
             raise Exception(self.errors[random.randint(0,len(self.errors)-1)]+ error_type)
         else:
             raise Exception(ERROR_NAME + " Error: " + error_type)
+
     def check_callback(self,var_name):
+        # print("YCK")
         current_toke = ""
         current_counter = 0
         final_carry = []
-        pre_vars = []
+        # pre_vars = []
         for key in self.varss[var_name].callback.keys():
             final_carry = []
-            
+            # print("Key",key)
             for letter in key:
                 
                 current_toke += letter
@@ -85,7 +88,7 @@ class Parser:
                         elif current_toke[:-1] in sorted(self.varss,key=len,reverse=True):
                             line = self.varss[current_toke[:-1]].carry
                         new_carry = ""
-                        
+                        # print("HMMM",self.varss["z"].carry,line,current_toke)
                         for word in line:
                             
                             if "VAR" in word:
@@ -108,11 +111,13 @@ class Parser:
                     elif self.check_sign(letter):
                         final_carry += letter
                         current_toke = ""
+            # print("Final",final_carry)
             if eval("".join(final_carry)):
                 # print(self.varss.keys())
                 # for key in self.varss.keys():
                 #     pre_vars.append(key)
                 # print("PRE",pre_vars)
+                # print("SEEMS")
                 parser_t = Parser(self.varss[var_name].callback[key],self.varss)
                 parser_t.run()
                 # print("PRE",pre_vars)        
@@ -141,7 +146,7 @@ class Parser:
                             
                             if "VAR" in line[i] or "LINK" in line[i]:
                                 
-                                exp.append(self.calc(self.varss[line[i][line[i].index(";")+1:]].carry))
+                                exp.append(self.calc(self.varss[line[i][line[i].index(";")+1:].replace(" ","")].carry))
                             elif "INT" in line[i] or "FLOAT" in line[i]:
                                 exp.append(line[i][line[i].index(";")+1:])
                             else:
@@ -168,22 +173,26 @@ class Parser:
         elif line[0] == "type":
             print(final_prin,end="")
 
-    def alter_var(self,line):
+    def alter_var(self,line,type_):
         
         if len(line) < 3:
+            
             self.Error("To few of arguments given.")
         elif line[1] != "=":
             self.Error("Assigment sign has not been found.")
         else:
-            if self.varss[line[0][line[0].index(";")+1:]].type == LINKED_VAR_NAME:
+            if line[0][line[0].index(";")+1:] in self.varss.keys() and self.varss[line[0][line[0].index(";")+1:]].type == LINKED_VAR_NAME:
                 if self.varss[line[0][line[0].index(";")+1:]].created:
                     self.Error("Cant modify a "+LINKED_VAR_NAME+" var, as its a CONST.")
                 else:
+                    # print("[CREATING CONST]",line[0][line[0].index(";")+1:])
+                    self.varss[line[0][line[0].index(";")+1:]] = Vars.Var(line[0][line[0].index(";")+1:],[],LINKED_VAR_NAME)
                     self.varss[line[0][line[0].index(";")+1:]].carry = line[2:]
                     self.varss[line[0][line[0].index(";")+1:]].created = True
                     
             else:
-                
+                if line[0][line[0].index(";")+1:] not in self.varss.keys():
+                    self.varss[line[0][line[0].index(";")+1:]] = Vars.Var(line[0][line[0].index(";")+1:],[],REGULAR_VAR_NAME)
                 new_carry = ""
                 new_type = ""
                 final_carry = []
@@ -275,7 +284,7 @@ class Parser:
         elif line[0] == "type" or line[0] == "typeln":
             self.typing(line)
         elif line[0] == "var" or line[0] == LINKED_VAR_NAME:
-            self.alter_var(line[1:])
+            self.alter_var(line[1:],line[0])
         elif line[0] == "get":
            self.input_data(line)
         elif line[0] == "when":
@@ -283,4 +292,4 @@ class Parser:
         elif line[0] == "end":
             self.end_state(line)
         elif line[0][line[0].index(";")+1:] in sorted(self.varss.keys(), key=len, reverse=True):
-            self.alter_var(line)
+            self.alter_var(line,self.varss[line[0][line[0].index(";")+1:]].type)

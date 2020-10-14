@@ -33,10 +33,11 @@ class Lexer:
         self.varss = {}
         self.vector_state = False
         self.vectors = {}
+        self.semi_vars = []
     
     def run(self):
 
-        check = ""
+        
         for line in self.text:  
             for letter in line:
                 # print(self.toke,"TOKEN")
@@ -110,17 +111,19 @@ class Lexer:
                 self.tokens[len(self.tokens)-1].append("ARG;"+self.toke.replace(" ",""))
             self.flag = 1
 
-        elif  (self.tokens[len(self.tokens)-1] == [REGULAR_VAR_NAME] or self.tokens[len(self.tokens)-1] == [LINKED_VAR_NAME]) and self.toke not in sorted(self.varss,key=len,reverse=True) and len(self.toke.replace(" ","")) > 0:
+        elif  (self.tokens[len(self.tokens)-1] == [REGULAR_VAR_NAME] or self.tokens[len(self.tokens)-1] == [LINKED_VAR_NAME]) and self.toke not in sorted(self.semi_vars,key=len,reverse=True) and len(self.toke.replace(" ","")) > 0:
             
             if self.check_sign(self.toke[-1]):
-                type_t = self.tokens[len(self.tokens)-1][0]
-                self.varss[self.toke.replace(" ","")] = Vars.Var(self.toke.replace(" ","")[:-1],[],type_t)
-                type_t = ""
+                # type_t = self.tokens[len(self.tokens)-1][0]
+                # self.varss[self.toke.replace(" ","")[:-1]] = Vars.Var(self.toke.replace(" ","")[:-1],[],type_t)
+                self.semi_vars.append(self.toke.replace(" ","")[:-1])
+                # type_t = ""
                 self.tokens[len(self.tokens)-1].append("VAR;"+self.toke.replace(" ","")[:-1])
             else:
-                type_t = self.tokens[len(self.tokens)-1][0]
-                self.varss[self.toke.replace(" ","")] = Vars.Var(self.toke.replace(" ",""),[],type_t)
-                type_t = ""
+                # type_t = self.tokens[len(self.tokens)-1][0]
+                # self.varss[self.toke.replace(" ","")] = Vars.Var(self.toke.replace(" ",""),[],type_t)
+                self.semi_vars.append(self.toke.replace(" ",""))
+                # type_t = ""
                 self.tokens[len(self.tokens)-1].append("VAR;"+self.toke.replace(" ",""))
             self.flag = 1
         elif len(self.toke.strip()) > 1 and self.toke.lstrip()[0] == '"' and (self.toke[-1] == '"' or self.toke[-2] == '"'):
@@ -130,7 +133,7 @@ class Lexer:
             else:
                 self.tokens[len(self.tokens)-1].append("STR;" + self.toke.strip()[1:-1])
             self.flag = 1
-        elif self.toke.replace(" ","")[:-1] in sorted(self.varss,key=len,reverse=True)  or self.toke.replace(" ","") in sorted(self.varss,key=len,reverse=True):
+        elif self.toke.replace(" ","")[:-1] in sorted(self.semi_vars,key=len,reverse=True)  or self.toke.replace(" ","") in sorted(self.semi_vars,key=len,reverse=True):
             
             if self.check_sign(self.toke.replace(" ","")[-1]):
                 self.tokens[len(self.tokens)-1].append("VAR;" + self.toke.replace(" ","")[:-1])
