@@ -45,7 +45,7 @@ class Lexer:
                 
                 if (self.check_sign(str(letter)) or letter == " " or self.counter == len(line)-1) and line[0] != "$":
                     
-                    check = self.check_toke()
+                    self.check_toke()
                 self.counter += 1
             self.toke = ""
             self.line_counter += 1
@@ -53,8 +53,8 @@ class Lexer:
             self.tokens.append([])
             self.vector_state = False 
             
-            check = ""
-        print(self.tokens)
+            
+        
         
     def check_sign(self,toke):
         self.sign_list = ["+","-","*","/","^","(",")","=","#",","]
@@ -79,7 +79,7 @@ class Lexer:
         return sum
     def check_toke(self):
         
-        type_t = ""
+        
         self.flag = 0
         if self.toke.replace(" ","") in self.key_words or (self.toke.replace(" ","")[:-1] in self.key_words and self.counter != len(self.text[self.line_counter])-1):
             
@@ -105,7 +105,7 @@ class Lexer:
             if self.check_sign(self.toke.replace(" ","")[-1]) and len(self.toke[:-1]) > 0:
                 
                 self.tokens[len(self.tokens)-1].append("ARG;"+self.toke.replace(" ","")[:-1])
-                print(self.tokens) 
+                 
             elif not self.check_sign(self.toke.replace(" ","")):
                 
                 self.tokens[len(self.tokens)-1].append("ARG;"+self.toke.replace(" ",""))
@@ -158,7 +158,7 @@ class Lexer:
         except:
             pass   
 
-        # print(self.toke)
+        
         if self.flag:
             self.toke = ""
         return self.tokens

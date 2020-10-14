@@ -8,7 +8,7 @@ REGULAR_VAR_NAME = "var"
 ERRORS_FILE = ""
 
 class Parser:
-    def __init__(self,tokens,varss):
+    def __init__(self,tokens,varss,semi):
         if tokens[-1] == []:
             self.tokens = tokens[:-1]
         else:
@@ -17,11 +17,16 @@ class Parser:
         self.line_counter = 0
         self.when_flag = False
         self.when_line = 0
+        if semi != []:
+            self.init_var(semi)
         if ERRORS_FILE.strip() != "":
             print("YAP")
             with open(ERRORS_FILE,"r") as file1:
                 self.errors = file1.readlines()
-        
+    def init_var(self,varss):
+        for var in varss:
+            self.varss[var] = Vars.Var(var,[],"")
+
     def run(self):
         # for key in self.varss.keys():
         #     print("VAR",self.varss[key].carry,self.varss[key].type)
@@ -66,7 +71,11 @@ class Parser:
             raise Exception(self.errors[random.randint(0,len(self.errors)-1)]+ error_type)
         else:
             raise Exception(ERROR_NAME + " Error: " + error_type)
+    def print_var(self):
 
+        for key in self.varss.keys():
+            print(key,self.varss[key].carry,self.varss[key].created)
+        print("[End]")
     def check_callback(self,var_name):
         # print("YCK")
         current_toke = ""
@@ -118,7 +127,7 @@ class Parser:
                 #     pre_vars.append(key)
                 # print("PRE",pre_vars)
                 # print("SEEMS")
-                parser_t = Parser(self.varss[var_name].callback[key],self.varss)
+                parser_t = Parser(self.varss[var_name].callback[key],self.varss,[])
                 parser_t.run()
                 # print("PRE",pre_vars)        
             
@@ -181,8 +190,9 @@ class Parser:
         elif line[1] != "=":
             self.Error("Assigment sign has not been found.")
         else:
-            if line[0][line[0].index(";")+1:] in self.varss.keys() and self.varss[line[0][line[0].index(";")+1:]].type == LINKED_VAR_NAME:
+            if line[0][line[0].index(";")+1:] in self.varss.keys() and (type_ == LINKED_VAR_NAME or self.varss[line[0][line[0].index(";")+1:]].type == LINKED_VAR_NAME):
                 if self.varss[line[0][line[0].index(";")+1:]].created:
+                    
                     self.Error("Cant modify a "+LINKED_VAR_NAME+" var, as its a CONST.")
                 else:
                     # print("[CREATING CONST]",line[0][line[0].index(";")+1:])
@@ -220,6 +230,9 @@ class Parser:
                 
                 self.varss[line[0][line[0].index(";")+1:]].carry = final_carry
                 self.varss[line[0][line[0].index(";")+1:]].created = True
+                self.varss[line[0][line[0].index(";")+1:]].type = type_
+                
+                # self.print_var()
                 self.check_callback(line[0][line[0].index(";")+1:])
 
     def input_data(self,line):
