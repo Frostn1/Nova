@@ -23,6 +23,9 @@ class Parser:
             # print("YAP")
             with open(ERRORS_FILE,"r") as file1:
                 self.errors = file1.readlines()
+        self.if_section = []
+        self.vars_when = []
+        self.when_lines = []
     def init_var(self,varss):
         for var in varss:
             self.varss[var] = Vars.Var(var,[],"")
@@ -79,11 +82,12 @@ class Parser:
         print("[End]")
 
     def check_callback(self,var_name):
-        print("YCK",var_name,self.varss[var_name].callback)
+        # print("YCK",var_name,self.varss[var_name].callback)
         current_toke = ""
         current_counter = 0
         final_carry = []
         # pre_vars = []
+        print("CHECK VAR",self.varss[var_name].callback.keys(),var_name)
         for key in self.varss[var_name].callback.keys():
             final_carry = []
             # print("Key",key)
@@ -91,12 +95,16 @@ class Parser:
                 
                 current_toke += letter
                 current_counter += 1
+                print("TOke",current_toke,len(key) == current_counter,current_counter)
                 if self.check_sign(letter) or len(key) == current_counter:
 
                     if current_toke[:-1] in sorted(self.varss,key=len,reverse=True) or current_toke in sorted(self.varss,key=len,reverse=True):
                         if current_toke in sorted(self.varss,key=len,reverse=True):
+                            print("IAM HERE")
                             line = self.varss[current_toke].carry
+                            print(line)
                         elif current_toke[:-1] in sorted(self.varss,key=len,reverse=True):
+                            print("TOke",current_toke)
                             line = self.varss[current_toke[:-1]].carry
                         new_carry = ""
                         # print("HMMM",self.varss["z"].carry,line,current_toke)
@@ -122,16 +130,19 @@ class Parser:
                     elif self.check_sign(letter):
                         final_carry += letter
                         current_toke = ""
-            print("Final",final_carry)
-            if eval("".join(final_carry)):
-                print("IS TRUE")
-                pre_vars = self.varss.keys()
-                # print("PRE",pre_vars,var_name,key_)
 
-                parser_t = Parser(self.varss[var_name].callback[key],self.varss,[])
-                parser_t.run()
-                post_vars = parser_t.varss.keys()
-                
+            print("Final",final_carry,var_name)
+            try:
+                if eval("".join(final_carry)):
+                    print("IS TRUE")
+                    pre_vars = self.varss.keys()
+                    # print("PRE",pre_vars,var_name,key_)
+
+                    parser_t = Parser(self.varss[var_name].callback[key],self.varss,[])
+                    parser_t.run()
+                    post_vars = parser_t.varss.keys()
+            except:
+                pass 
                 # print("POST",post_vars)
                 # print("PRE",pre_vars)        
             
@@ -267,23 +278,22 @@ class Parser:
                     self.Error("Cant modify a "+ LINKED_VAR_NAME +" var, as its a CONST.")
             else:
                 self.Error("The Var given to the get function hasnt been manufactored yet.")
+    
     def when_state(self,line):
-        
-        
+
         if "when" in line[0]:
-            print("YES")
+            # print("YES")
+            self.vars_when.append([])
             self.when_line_num = self.line_counter
-            self.if_section = ""
-            self.vars_when = []
-            self.when_lines = []
+            if_section = ""
             for word in line[2:-2]:
                 if word != " ":
                     if word == "#":
-                            self.if_section += word.replace("#","==")
+                        if_section += word.replace("#","==")
                     if word != " " and ";" in word and word[word.index(";")+1:] in sorted(self.varss,key=len,reverse=True):
-                        self.if_section += word[word.index(";")+1:]
-                        self.vars_when.append(word[word.index(";")+1:])  
-            
+                        if_section += word[word.index(";")+1:]
+                        self.vars_when[len(self.vars_when)-1].append(word[word.index(";")+1:])  
+            self.if_section += [if_section]
         else:
             
             self.when_lines.append(line)
@@ -292,11 +302,11 @@ class Parser:
         self.when_flag -= 1
         # print("ENDING",self.when_flag)
         # print("Lines",self.when_lines)
-        if self.when_flag == 0:
-            print("HMMMMMM",self.vars_when) 
-            for var in self.vars_when:
-                self.varss[var].callback[self.if_section] = self.when_lines
-            # print(var,self.varss[var].callback)
+        
+        print("HMMMMMM",self.vars_when,self.when_flag,self.if_section) 
+        for var in self.vars_when[self.when_flag]:
+            self.varss[var].callback[self.if_section[self.when_flag]] = self.when_lines
+        # print(var,self.varss[var].callback)
 
     def execute(self,line):
         
