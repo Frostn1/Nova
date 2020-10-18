@@ -1,20 +1,9 @@
-var x = 1
-var z = 2
-link y = z
-
+var x= 2
+link y = 1
+println("Yes" y)
+println("This works")
 when(x # y):
-    typeln("YEP")
-    var in = 5
-    var tm = 5
-    when(in # tm):
-        typeln("Hello")
-    end
-    
-    typeln(in)
+println("HELLO")
 end
-
-z = 11
-x = 11
-typeln(x)
-typeln("HEY")
-type(in)
+x = 2
+println(y)

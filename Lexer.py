@@ -15,8 +15,8 @@ class Lexer:
         self.counter = 0
         self.line_counter = 0
         self.key_words = [
-            "typeln",
-            "type",
+            "println",
+            "print",
             "var",
             "link",
             "get",

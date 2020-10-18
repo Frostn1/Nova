@@ -5,7 +5,7 @@ COMPILER_NAME = "Commander"
 
 LINKED_VAR_NAME = "link"
 REGULAR_VAR_NAME = "var"
-ERRORS_FILE = ""
+ERRORS_FILE = "Errors.txt"
 
 class Parser:
     def __init__(self,tokens,varss,semi):
@@ -34,13 +34,14 @@ class Parser:
         # for key in self.varss.keys():
         #     print("VAR",self.varss[key].carry,self.varss[key].type)
         
-        # print(self.tokens)
+        print(self.tokens)
         for line in self.tokens:
             self.execute(line) 
             self.line_counter += 1
         if self.when_flag:
-            print("WHEN IS",self.when_flag)
+            # print("WHEN IS",self.when_flag)
             self.Error("When statement was not close by a 'end' statement at line ")
+    
     def calc(self,list_):
 
         sum = []
@@ -87,7 +88,7 @@ class Parser:
         current_counter = 0
         final_carry = []
         # pre_vars = []
-        print("CHECK VAR",self.varss[var_name].callback.keys(),var_name)
+        # print("CHECK VAR",self.varss[var_name].callback.keys(),var_name)
         for key in self.varss[var_name].callback.keys():
             final_carry = []
             # print("Key",key)
@@ -95,16 +96,16 @@ class Parser:
                 
                 current_toke += letter
                 current_counter += 1
-                print("TOke",current_toke,len(key) == current_counter,current_counter)
+                # print("TOke",current_toke,len(key) == current_counter,current_counter)
                 if self.check_sign(letter) or len(key) == current_counter:
 
                     if current_toke[:-1] in sorted(self.varss,key=len,reverse=True) or current_toke in sorted(self.varss,key=len,reverse=True):
                         if current_toke in sorted(self.varss,key=len,reverse=True):
-                            print("IAM HERE")
+                            # print("IAM HERE")
                             line = self.varss[current_toke].carry
-                            print(line)
+                            # print(line)
                         elif current_toke[:-1] in sorted(self.varss,key=len,reverse=True):
-                            print("TOke",current_toke)
+                            # print("TOke",current_toke)
                             line = self.varss[current_toke[:-1]].carry
                         new_carry = ""
                         # print("HMMM",self.varss["z"].carry,line,current_toke)
@@ -131,10 +132,10 @@ class Parser:
                         final_carry += letter
                         current_toke = ""
 
-            print("Final",final_carry,var_name)
+            # print("Final",final_carry,var_name)
             try:
                 if eval("".join(final_carry)):
-                    print("IS TRUE")
+                    # print("IS TRUE")
                     pre_vars = self.varss.keys()
                     # print("PRE",pre_vars,var_name,key_)
 
@@ -192,9 +193,9 @@ class Parser:
                         final_prin += final_exp
 
             counter += 1
-        if line[0] == "typeln":
+        if line[0] == "println":
             print(final_prin)
-        elif line[0] == "type":
+        elif line[0] == "print":
             print(final_prin,end="")
 
     def alter_var(self,line,type_):
@@ -303,7 +304,7 @@ class Parser:
         # print("ENDING",self.when_flag)
         # print("Lines",self.when_lines)
         
-        print("HMMMMMM",self.vars_when,self.when_flag,self.if_section) 
+        # print("HMMMMMM",self.vars_when,self.when_flag,self.if_section) 
         for var in self.vars_when[self.when_flag]:
             self.varss[var].callback[self.if_section[self.when_flag]] = self.when_lines
         # print(var,self.varss[var].callback)
@@ -320,7 +321,7 @@ class Parser:
         elif self.when_flag and line != ["end"]:
             # print("HMM I AM HERE",line)
             self.when_state(line)
-        elif line[0] == "type" or line[0] == "typeln":
+        elif line[0] == "print" or line[0] == "println":
             self.typing(line)
         elif line[0] == "var" or line[0] == LINKED_VAR_NAME:
             self.alter_var(line[1:],line[0])
