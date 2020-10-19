@@ -1,9 +1,8 @@
-var x = 0
+var x = 5
 var sum = 1
 when(x):
 sum = sum * x
 x = x - 1
 end
-println("Type your number: ")
-get(x)
+x = x
 print("The sum is " sum)
