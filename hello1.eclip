@@ -1,9 +1,0 @@
-var x= 2
-link y = 1
-println("Yes" y)
-println("This works")
-when(x # y):
-println("HELLO")
-end
-x = 2
-println(y)

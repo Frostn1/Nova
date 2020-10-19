@@ -5,7 +5,7 @@ COMPILER_NAME = "Commander"
 
 LINKED_VAR_NAME = "link"
 REGULAR_VAR_NAME = "var"
-ERRORS_FILE = "Errors.txt"
+ERRORS_FILE = ""#Errors.txt
 
 class Parser:
     def __init__(self,tokens,varss,semi):
@@ -34,7 +34,7 @@ class Parser:
         # for key in self.varss.keys():
         #     print("VAR",self.varss[key].carry,self.varss[key].type)
         
-        print(self.tokens)
+        # print(self.tokens)
         for line in self.tokens:
             self.execute(line) 
             self.line_counter += 1
