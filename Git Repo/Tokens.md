@@ -1,20 +1,20 @@
 # __Official Tokens Eclipse Coding lang__ 
 
-## *Type*
+## *Print*
 * Print the following statement with no new line
 
-<span class="hljs-keyword">type</span>(<span class="hljs-string">&quot;Hello &quot;</span>)<span class="hljs-comment">
+<span class="hljs-keyword">print</span>(<span class="hljs-string">&quot;Hello &quot;</span>)<span class="hljs-comment">
 
-</span><span class="hljs-keyword">type</span>(<span class="hljs-string">&quot;World&quot;</span>)<span class="hljs-comment"></span>
+</span><span class="hljs-keyword">print</span>(<span class="hljs-string">&quot;World&quot;</span>)<span class="hljs-comment"></span>
 
 <span class="hljs-string">Hello World</span><span class="hljs-comment">
 
-## *Typeln*
+## *Println*
 * Print the following statement with a new line
 
-<span class="hljs-keyword">typeln</span>(<span class="hljs-string">&quot;Hello &quot;</span>)<span class="hljs-comment">
+<span class="hljs-keyword">println</span>(<span class="hljs-string">&quot;Hello &quot;</span>)<span class="hljs-comment">
 
-<span class="hljs-keyword">type</span>(<span class="hljs-string">&quot;World&quot;</span>)<span class="hljs-comment">
+<span class="hljs-keyword">println</span>(<span class="hljs-string">&quot;World&quot;</span>)<span class="hljs-comment">
 
 <span class="hljs-string">Hello</span><span class="hljs-comment"></span>
 
@@ -36,6 +36,9 @@
 <span class="hljs-keyword">var</span> number = <span class="hljs-number">0</span><span class="hljs-comment">
 
 </span><span class="hljs-keyword">get</span>(number)<span class="hljs-comment"></span>
+
+## *When* *End* 
+* Special statement in Eclipse Language, which works as in a normal if, and will trigger if one of the vars in the statement is altered
 
 ## *Comments*
 * Using the `$` will create a comment statement
