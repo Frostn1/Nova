@@ -1,0 +1,19 @@
+$var str = "number is: "
+$var a = 5
+$println("a is: " a " next " str a 1)
+
+var dollars = 0
+var rate = 0
+var loop = 0
+link output = dollars * rate
+when(loop):
+
+print("Enter the amound of dollars to convert ")
+get(dollars)
+print("Enter the rate of the dollar ")
+get(rate)
+println("The output is " output)
+println("Calculate again? 0 for No else for Yes ")
+get(loop)
+end
+loop = 1

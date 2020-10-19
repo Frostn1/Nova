@@ -170,7 +170,7 @@ class Parser:
                         while "STR" not in line[i]  and i < len(line)-1:
                             
                             if "VAR" in line[i] or "LINK" in line[i]:
-                                
+
                                 exp.append(self.calc(self.varss[line[i][line[i].index(";")+1:].replace(" ","")].carry))
                             elif "INT" in line[i] or "FLOAT" in line[i]:
                                 exp.append(line[i][line[i].index(";")+1:])
@@ -191,7 +191,9 @@ class Parser:
                                     final_exp += param
 
                         final_prin += final_exp
-
+                        final_exp = ""
+                        exp = []
+                        
             counter += 1
         if line[0] == "println":
             print(final_prin)
