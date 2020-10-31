@@ -44,6 +44,8 @@ def lex(text):
 def parse(tokens,varss,vectors,semi):
     parser_t = Parser.Parser(tokens,varss,semi)
     parser_t.run()
+    # for key in parser_t.varss.keys():
+    #         print("VAR",parser_t.varss[key].carry,parser_t.varss[key].type,parser_t.varss[key].callback)
 def run(file_to_run):
     
     check_file(file_to_run)

@@ -32,7 +32,7 @@ class Parser:
 
     def run(self):
         # for key in self.varss.keys():
-        #     print("VAR",self.varss[key].carry,self.varss[key].type)
+        #     print("VAR",self.varss[key].carry,self.varss[key].type,self.varss[key].callback)
         
         # print(self.tokens)
         for line in self.tokens:
@@ -89,6 +89,10 @@ class Parser:
         final_carry = []
         # pre_vars = []
         # print("CHECK VAR",self.varss[var_name].callback.keys(),var_name)
+        # try:
+        #     print(self.varss[var_name].callback)
+        # except:
+        #     print("UTTO")
         for key in self.varss[var_name].callback.keys():
             final_carry = []
             # print("Key",key)
@@ -136,6 +140,7 @@ class Parser:
             try:
                 if eval("".join(final_carry)):
                     # print("IS TRUE")
+                    # print("What")
                     pre_vars = self.varss.keys()
                     # print("PRE",pre_vars,var_name,key_)
 
@@ -251,7 +256,10 @@ class Parser:
                 self.varss[line[0][line[0].index(";")+1:]].type = type_
                 
                 # self.print_var()
-                self.check_callback(line[0][line[0].index(";")+1:])
+                try:
+                    self.check_callback(line[0][line[0].index(";")+1:])
+                except:
+                    print("PRO")
 
     def input_data(self,line):
         if len(line) != 4:
@@ -275,8 +283,10 @@ class Parser:
                         new_type = "STR;"
                     final_carry.append(new_type + str(inp))
                     self.varss[line[2][line[2].index(";")+1:]].carry = final_carry
-                    
-                    self.check_callback(line[2][line[2].index(";")+1:])
+                    try:
+                        self.check_callback(line[2][line[2].index(";")+1:])
+                    except:
+                        print("PROB")
                 else:
                     self.Error("Cant modify a "+ LINKED_VAR_NAME +" var, as its a CONST.")
             else:
@@ -285,7 +295,7 @@ class Parser:
     def when_state(self,line):
 
         if "when" in line[0]:
-            # print("YES")
+            # print("YES",line[2:-2])
             self.vars_when.append([])
             self.when_line_num = self.line_counter
             if_section = ""
@@ -294,7 +304,9 @@ class Parser:
                     if word == "#":
                         if_section += word.replace("#","==")
                     if word != " " and ";" in word and word[word.index(";")+1:] in sorted(self.varss,key=len,reverse=True):
+                        
                         if_section += word[word.index(";")+1:]
+                        
                         self.vars_when[len(self.vars_when)-1].append(word[word.index(";")+1:])  
             self.if_section += [if_section]
         else:
@@ -305,11 +317,13 @@ class Parser:
         self.when_flag -= 1
         # print("ENDING",self.when_flag)
         # print("Lines",self.when_lines)
-        
+        # print("NO",self.when_lines,self.if_section,self.vars_when[self.when_flag])
         # print("HMMMMMM",self.vars_when,self.when_flag,self.if_section) 
         for var in self.vars_when[self.when_flag]:
             self.varss[var].callback[self.if_section[self.when_flag]] = self.when_lines
         # print(var,self.varss[var].callback)
+        self.if_section = []
+        self.vars_when = []
 
     def execute(self,line):
         

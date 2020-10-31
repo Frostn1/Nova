@@ -1,9 +1,21 @@
-var max = 5
-var x = max
-link output = max - x
-when(x):
-println(output)
-x = x -1
+var max = 5 
+var x = max 
+link output = max - x 
+var temp = 0 
+var sum = 1 
+print("Hello")
+when(temp):
+
+sum = sum * temp
+temp = temp - 1
+
 end
-x = x
+
+when(x):
+temp = output 
+print(output "Factorial is" sum)
+sum = 1
+x = x -1 
+end
+x = x 
 
