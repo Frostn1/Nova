@@ -34,7 +34,7 @@ class Parser:
         # for key in self.varss.keys():
         #     print("VAR",self.varss[key].carry,self.varss[key].type,self.varss[key].callback)
         
-        print(self.tokens)
+        # print(self.tokens)
         for line in self.tokens:
             self.execute(line) 
             self.line_counter += 1
@@ -94,13 +94,15 @@ class Parser:
         # except:
         #     print("UTTO")
         for key in self.varss[var_name].callback.keys():
-            print("KEY IS",key)
+            #print("KEY IS",key)
             final_carry = []
             for letter in key:
                 current_toke += letter
                 current_counter += 1
                 if self.check_sign(letter) or len(key) == current_counter:
+                    #print("CURR",current_toke)
                     if current_toke[:-1] in sorted(self.varss,key=len,reverse=True) or current_toke in sorted(self.varss,key=len,reverse=True):
+
                         if current_toke in sorted(self.varss,key=len,reverse=True):
                             line = self.varss[current_toke].carry
                         elif current_toke[:-1] in sorted(self.varss,key=len,reverse=True):
@@ -129,16 +131,15 @@ class Parser:
                         current_toke = ""
                     elif self.check_sign(letter):
                         final_carry += letter
-                        
                         current_toke = ""
                     else:
-                        
-                        final_carry += current_toke
+                        #print("HEY",current_toke,letter) 
+                        final_carry.append(current_toke)
                         current_toke = ""
                 
 
 
-            print("Final",final_carry,var_name)
+            # print("Final",final_carry,var_name,"".join(final_carry), 10<=9)
             try:
                 if eval("".join(final_carry)):
                     #print("IS TRUE")
@@ -305,7 +306,7 @@ class Parser:
                     elif self.check_sign(word):
                         if_section += word
                     elif "or" == word or "and" == word or "not" == word:
-                       if_section += word
+                       if_section += " " + word + " "
                     if word != " " and ";" in word and word[word.index(";")+1:] in sorted(self.varss,key=len,reverse=True):
                         
                         if_section += word[word.index(";")+1:]
