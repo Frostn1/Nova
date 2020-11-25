@@ -34,7 +34,7 @@ class Parser:
         # for key in self.varss.keys():
         #     print("VAR",self.varss[key].carry,self.varss[key].type,self.varss[key].callback)
         
-        # print(self.tokens)
+        print(self.tokens)
         for line in self.tokens:
             self.execute(line) 
             self.line_counter += 1
@@ -66,7 +66,7 @@ class Parser:
                 self.simplify(element,list2)
         return list2
     def check_sign(self,toke):
-        self.sign_list = ["+","-","*","/","^","(",")","="]
+        self.sign_list = ["+","-","*","/","^","(",")","=","!",">","<"]
         for sign in self.sign_list:
             if sign == toke:
                 return sign
@@ -94,25 +94,20 @@ class Parser:
         # except:
         #     print("UTTO")
         for key in self.varss[var_name].callback.keys():
+            print("KEY IS",key)
             final_carry = []
-            # print("Key",key)
             for letter in key:
-                
                 current_toke += letter
                 current_counter += 1
-                # print("TOke",current_toke,len(key) == current_counter,current_counter)
                 if self.check_sign(letter) or len(key) == current_counter:
-
                     if current_toke[:-1] in sorted(self.varss,key=len,reverse=True) or current_toke in sorted(self.varss,key=len,reverse=True):
                         if current_toke in sorted(self.varss,key=len,reverse=True):
-                            # print("IAM HERE")
                             line = self.varss[current_toke].carry
-                            # print(line)
                         elif current_toke[:-1] in sorted(self.varss,key=len,reverse=True):
-                            # print("TOke",current_toke)
+                            
                             line = self.varss[current_toke[:-1]].carry
                         new_carry = ""
-                        # print("HMMM",self.varss["z"].carry,line,current_toke)
+                        
                         for word in line:
                             
                             if "VAR" in word:
@@ -134,13 +129,19 @@ class Parser:
                         current_toke = ""
                     elif self.check_sign(letter):
                         final_carry += letter
+                        
                         current_toke = ""
+                    else:
+                        
+                        final_carry += current_toke
+                        current_toke = ""
+                
 
-            # print("Final",final_carry,var_name)
+
+            print("Final",final_carry,var_name)
             try:
                 if eval("".join(final_carry)):
-                    # print("IS TRUE")
-                    # print("What")
+                    #print("IS TRUE")
                     pre_vars = self.varss.keys()
                     # print("PRE",pre_vars,var_name,key_)
 
@@ -149,8 +150,7 @@ class Parser:
                     post_vars = parser_t.varss.keys()
             except:
                 pass 
-                # print("POST",post_vars)
-                # print("PRE",pre_vars)        
+                      
             
         
     def typing(self,line):
@@ -265,7 +265,6 @@ class Parser:
         if len(line) != 4:
             self.Error("Number of arguments given to the 'get' function is wrong.")
         else:
-            
             if line[2][line[2].index(";")+1:] in sorted(self.varss.keys(), key=len, reverse=True):
                 
                 if self.varss[line[2][line[2].index(";")+1:]].type == "var":
@@ -295,7 +294,7 @@ class Parser:
     def when_state(self,line):
 
         if "when" in line[0]:
-            # print("YES",line[2:-2])
+            
             self.vars_when.append([])
             self.when_line_num = self.line_counter
             if_section = ""
@@ -303,11 +302,17 @@ class Parser:
                 if word != " ":
                     if word == "#":
                         if_section += word.replace("#","==")
+                    elif self.check_sign(word):
+                        if_section += word
+                    elif "or" == word or "and" == word or "not" == word:
+                       if_section += word
                     if word != " " and ";" in word and word[word.index(";")+1:] in sorted(self.varss,key=len,reverse=True):
                         
                         if_section += word[word.index(";")+1:]
                         
-                        self.vars_when[len(self.vars_when)-1].append(word[word.index(";")+1:])  
+                        self.vars_when[len(self.vars_when)-1].append(word[word.index(";")+1:])
+                    elif word != " " and ";" in word:
+                        if_section += word[word.index(";")+1:]      
             self.if_section += [if_section]
         else:
             

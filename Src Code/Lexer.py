@@ -5,7 +5,9 @@ COMPILER_NAME = "Commander"
 LINKED_VAR_NAME = "link"
 REGULAR_VAR_NAME = "var"
 
-
+#"Vector",
+#"sin",
+#"cos"
 
 class Lexer:
     def __init__(self,text):
@@ -24,9 +26,10 @@ class Lexer:
             "end",
             "#",
             ":",
-            "Vector",
-            "sin",
-            "cos"
+            "and",
+            "or",
+            "not"
+            
         ]
 
         self.tokens = [[]]
@@ -57,7 +60,7 @@ class Lexer:
         
         
     def check_sign(self,toke):
-        self.sign_list = ["+","-","*","/","^","(",")","=","#",","]
+        self.sign_list = ["+","-","*","/","^","(",")","=","#",",","!",">","<"]
         for sign in self.sign_list:
             if sign == toke:
                 return sign

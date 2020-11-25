@@ -1,0 +1,5 @@
+var x = 10
+when(x<9 or x):
+println("Hey")
+end
+x = x
