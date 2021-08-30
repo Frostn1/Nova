@@ -1,9 +1,0 @@
-var max = 5
-var x = max
-link output = max - x
-when(x):
-println(output)
-x = x -1
-end
-x = x
-
