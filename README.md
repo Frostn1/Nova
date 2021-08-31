@@ -1,2 +1,2 @@
-# Eclipse-Programming-Language
+# Nova
   Rebasing the language, please checkout `develop` branch until further notice
