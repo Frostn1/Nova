@@ -1,4 +1,5 @@
 import sys
+import lexer
 
 def main(argv : list):
     if len(argv) < 2:
@@ -9,5 +10,8 @@ def main(argv : list):
         if not fileP.readable():
             raise Exception("file error : file not readable")
         fileContent = fileP.read()
+        lex = lexer.Lexer(fileContent, argv[1], fileP)
+        lex.lexify()
+        lex.printTokens()
 if __name__ == "__main__":
     main(sys.argv)

@@ -14,7 +14,7 @@ class Lexer:
 
         self.symbols = ['{', '}', '(', ')', '[', ']', '.', '"', '*', '\n', ':', ','] # single-char keywords
         self.other_symbols = ['\\', '/*', '*/'] # multi-char keywords
-        KEYWORDS = symbols + other_symbols
+        self.KEYWORDS = self.symbols + self.other_symbols
 
         #-------------------------------
 
@@ -43,11 +43,19 @@ class Lexer:
                 if char != white_space:
                     lexeme += char # adding a char each time
             if (index+1 < length): # prevents error
-                if self.code[index+1] == white_space or self.code[index+1] in KEYWORDS or lexeme in KEYWORDS: # if next char == ' '
+                if self.code[index+1] == white_space or self.code[index+1] in self.KEYWORDS or lexeme in self.KEYWORDS: # if next char == ' '
                     if lexeme != '':
-                        print(lexeme.replace('\n', '<newline>'))
+                        # print(lexeme.replace('\n', '<newline>'))
+                        self.tokens.append(Token(lexeme, self.line, self.column-len(lexeme) + 1))
+                        if '\n' in lexeme:
+                            self.line += 1
+                            self.column = 1
+                        else:
+                            self.column += 1
                         lexeme = ''
+                else:
+                    self.column += 1
 
     def printTokens(self):
-        for token in tokens:
+        for token in self.tokens:
             print("[ TOKEN ] -> \n\tvalue :",token.value,"\n\tline :",token.line,"\n\tcolumn :",token.column)
