@@ -14,7 +14,8 @@ class Lexer:
 
         self.symbols = ['{', '}', '(', ')', '[', ']', '.', '"', '*', '\n', ':', ','] # single-char keywords
         self.other_symbols = ['\\', '/*', '*/'] # multi-char keywords
-        self.KEYWORDS = self.symbols + self.other_symbols
+        self.arthemic = ['=','+','-','*','/']
+        self.KEYWORDS = self.symbols + self.other_symbols + self.arthemic
 
         #-------------------------------
 
@@ -39,13 +40,11 @@ class Lexer:
                     lexeme += '/'
                 else:
                     continue
-            else:
-                if char != white_space:
-                    lexeme += char # adding a char each time
+            elif char != white_space and char != '\n':
+                lexeme += char # adding a char each time
             if (index+1 < length): # prevents error
                 if self.code[index+1] == white_space or self.code[index+1] in self.KEYWORDS or lexeme in self.KEYWORDS: # if next char == ' '
                     if lexeme != '':
-                        # print(lexeme.replace('\n', '<newline>'))
                         self.tokens.append(Token(lexeme, self.line, self.column-len(lexeme) + 1))
                         if '\n' in lexeme:
                             self.line += 1
