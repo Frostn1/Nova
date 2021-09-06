@@ -12,6 +12,8 @@ def main(argv : list):
         fileContent = fileP.read()
         lex = lexer.Lexer(fileContent, argv[1], fileP)
         lex.lexify()
+        par = lexer.Parser(lex)
         lex.printTokens()
+        par.parse()
 if __name__ == "__main__":
     main(sys.argv)
