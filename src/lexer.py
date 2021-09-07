@@ -84,7 +84,37 @@ class Parser:
     def parse(self):
         index = 0
         while index < len(self.tokens):
-            if self.tokens[index].value == 'let':
+            if self.tokens[index].value == 'let' or self.tokens[index].value == 'link':
+                index += 1
+                if self.tokens[index].value.isidentifier():
+                    index += 1
+                    if self.tokens[index].value == '=':
+                        index += 1
+                        expression = []
+                        while self.tokens[index].value != ';':
+                            print("index ->",index, self.tokens[index].value)
+                            expression.append(self.tokens[index].value)
+                            index += 1
+                        if len(expression) < 1:
+                            print("parser error : missing expression at",self.tokens[index].line,self.tokens[index].column)
+                        
+                        # Check for value or expression
+                    else :
+                        print("parser error : missing assignment operator at",self.tokens[index].line,self.tokens[index].column)
+                else:
+                    print("parser error : invalid iden at",self.tokens[index].line,self.tokens[index].column)
+                    exit(1)
+            index += 1
+
+class Semantic:
+    def __init__(self, par : Parser):
+        self.tokens = par.tokens
+    def checkExpression(self):
+        pass
+    def analyse(self):
+        index = 0
+        while index < len(self.tokens):
+            if self.tokens[index].value == 'let' or self.tokens[index].value == 'link':
                 index += 1
                 if self.tokens[index].value.isidentifier():
                     index += 1
