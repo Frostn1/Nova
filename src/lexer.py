@@ -1,7 +1,6 @@
 class Token:
-    def __init__(self, id : int, type : str, value : str, line : int, column : int):
+    def __init__(self, id : int, value : str, line : int, column : int):
         self.id = id
-        self.type = type
         self.value = value
         self.line = line
         self.column = column
@@ -11,10 +10,10 @@ class Lexer:
         self.code = fileContent
         self.filePath = filePath
         self.filePointer = filePointer
-
+        self.check = ""
         #-------------------------------
 
-        self.symbols = ['{', '}', '(', ')', '[', ']', '.', '"', '*', '\n', ':', ','] # single-char keywords
+        self.symbols = ['{', '}', '(', ')', '[', ']', '.', '"', '*', '\n', ':', ',',';'] # single-char keywords
         self.other_symbols = ['\\', '/*', '*/'] # multi-char keywords
         self.arthemic = ['=','+','-','*','/']
         self.KEYWORDS = self.symbols + self.other_symbols + self.arthemic
@@ -24,12 +23,15 @@ class Lexer:
         self.tokens = []
         self.line = 1
         self.column = 1
-
+        self.id = 1
+    def addLetter(self, currentChar : chr):
+        self.check += currentChar
     def lexify(self):
         length = len(self.code)
         white_space = ' '
         lexeme = ''
         for index,char in enumerate(self.code):
+            self.addLetter(char)
             if char == '*':
                 if self.code[index-1] == '/':
                     lexeme += '/*'
@@ -52,12 +54,25 @@ class Lexer:
                             self.column = 1
                         elif '\n' not in lexeme:
                             self.column += 1
-                        self.tokens.append(Token(lexeme.replace('\n',''), self.line, self.column-len(lexeme) + 1))
+                        print("Added ------>", lexeme.replace('\n',''))
+                        self.tokens.append(Token(self.id, lexeme.replace('\n',''), self.line, self.column-len(lexeme) + 1))
+                        self.id += 1
                         lexeme = ''
                 else:
                     self.column += 1
-
+            else:
+                if lexeme != '':
+                    if '\n' in lexeme:
+                        self.line += 1
+                        self.column = 1
+                    elif '\n' not in lexeme:
+                        self.column += 1
+                    print("Added ------>", lexeme.replace('\n',''))
+                    self.tokens.append(Token(self.id, lexeme.replace('\n',''), self.line, self.column-len(lexeme) + 1))
+                    self.id += 1
+                    lexeme = ''
     def printTokens(self):
+        print("[Check] =>",self.check)
         for token in self.tokens:
             print("[ TOKEN ] -> \n\tvalue :",token.value,"\n\tline :",token.line,"\n\tcolumn :",token.column)
 

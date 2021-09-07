@@ -14,6 +14,6 @@ def main(argv : list):
         lex.lexify()
         par = lexer.Parser(lex)
         lex.printTokens()
-        par.parse()
+        # par.parse()
 if __name__ == "__main__":
     main(sys.argv)
