@@ -10,10 +10,11 @@ def main(argv : list):
         if not fileP.readable():
             raise Exception("file error : file not readable")
         fileContent = fileP.read()
-        lex = lexer.Lexer(fileContent, argv[1], fileP)
-        lex.lexify()
-        par = lexer.Parser(lex)
-        lex.printTokens()
-        # par.parse()
+        par = lexer.Parser(lexer.Lexer(fileContent, argv[1], fileP).lexify())
+        # lex.printTokens()
+        par.parse()
+        sem = lexer.Semantic(par)
+        sem.analyse()
+        
 if __name__ == "__main__":
     main(sys.argv)
