@@ -12,7 +12,6 @@ class Lexer:
         self.code = fileContent
         self.filePath = filePath
         self.filePointer = filePointer
-        self.check = ""
 
         self.handler = errorhandling.ErrorHandler()
         #-------------------------------
@@ -153,6 +152,7 @@ class Semantic:
         self.handler = handler
         #-------------------------------------------------
 
+        self.index = 0
         self.validOperators = [i for i in '+-*/()']
     def checkExpression(self, expressionList : list):
         verified = []
@@ -181,6 +181,7 @@ class Semantic:
                 # exit(1)
         else:
             lastType = verified[0].type
+        # print("LAST",lastType, verified[0].value,[i.value for i in verified])
         stringList = []
         for index,ver in enumerate(verified):
             if ver.type != "identifier" and ver.type != lastType and ver.type != "operator":
@@ -199,7 +200,6 @@ class Semantic:
         return str(final)
 
     def analyse(self):
-        self.index = 0
         while self.index < len(self.tokens):
             if self.tokens[self.index].value == 'let' or self.tokens[self.index].value == 'link':
                 self.index += 1
@@ -224,12 +224,67 @@ class Semantic:
     
 
 class CodeGen:
-    def __init__(self, tokens, handler) -> None:
+    class Flag:
+        def __init__(self, shortname, longname) -> None:
+            self.shortname = shortname
+            self.longname = longname
+            self.used = False
+    def __init__(self, tokens, handler, filepath = 'default.c') -> None:
         self.tokens = tokens
         self.handler = handler
-
+        self.filepath = filepath
+        self.sem = Semantic(self.tokens,errorhandling.ErrorHandler())
+    
     def generate(self, flags : list) -> None:
+        flagChecks = [self.Flag("cf","cformat"),self.Flag("le","logerrors"),self.Flag("pf","printfunctions"),self.Flag("e","export")]
         for flag in flags:
-            if flag[0] != '-':
+            if flag[0] != '-' or len(flag) - flag.count('-') < 1:
                 self.handler.add(errorhandling.Error("generator", "syntax", "unexpected flag at CLI",(0,0),flag))
-        self.handler.write()
+            elif (flag[2:] == flagChecks[0].longname or flag[1:] == flagChecks[0].shortname) and not flagChecks[0].used:
+                flagChecks[0].used = True
+                self.cgenrate()
+            elif (flag[2:] == flagChecks[1].longname or flag[1:] == flagChecks[1].shortname) and not flagChecks[1].used:
+                flagChecks[1].used = True
+                self.handler.write()
+            elif (flag[2:] == flagChecks[2].longname or flag[1:] == flagChecks[2].shortname) and not flagChecks[2].used:
+                flagChecks[2].used = True
+                print("-pf flag")
+            elif (flag[2:] == flagChecks[3].longname or flag[1:] == flagChecks[3].shortname) and not flagChecks[3].used:
+                flagChecks[3].used = True
+                print("-e flag")
+
+    def cgenrate(self):
+        def guesstype(expression):
+            exp = self.sem.checkExpression(expression)
+            print("exp", exp)
+            if exp.isnumeric() or ('.' in exp and exp[exp.index('.')+1:].isnumeric() and exp[:exp.index('.')].isnumeric() and exp[:exp.index('.')][0] == '0'):
+                return 'int'
+            elif ('.' in exp and exp[exp.index('.')+1:].isnumeric() and exp[:exp.index('.')].isnumeric()):
+                return 'float'
+
+        def newfile(path, includes = []):
+            with open(path, 'w') as new:
+                formalIncludes = ['stdio.h','stdlib.h', 'string.h']
+                formalIncludes += includes
+                for include in formalIncludes:
+                    new.write('#include <'+include+'>\n')
+                new.write('\nint main(int argc, char** argv) {\n')
+
+        newfile(self.filepath)
+        with open(self.filepath,'a') as new:
+            index = 0
+            while index < len(self.tokens):
+                if self.tokens[index].value == 'let':
+                    index += 3
+                    expression = []
+                    while index < len(self.tokens) - 1 and self.tokens[index + 1] != ';':   
+                        expression.append(self.tokens[index].value)
+                        index += 1
+                    new.write('\t' + guesstype(expression))
+                    new.write(' ' +  self.tokens[index-len(expression) - 2].value)
+                    new.write(' ' + self.tokens[index-len(expression) - 1].value)
+                    new.write(' ' + ' '.join(expression) + ';\n')
+                index += 1
+            new.write('}')
+            
+                
