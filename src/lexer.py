@@ -231,5 +231,5 @@ class CodeGen:
     def generate(self, flags : list) -> None:
         for flag in flags:
             if flag[0] != '-':
-                self.handler.add(errorhandling.Error("generator", "syntax", "unexpected flag at CLI", missValue=flag))
+                self.handler.add(errorhandling.Error("generator", "syntax", "unexpected flag at CLI",(0,0),flag))
         self.handler.write()

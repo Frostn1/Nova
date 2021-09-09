@@ -9,9 +9,9 @@ class Error:
         # TODO : Custom print error message with color
         pass
     def __str__(self) -> str:
-        return "["+str(self.pos[0])+":"+str(self.pos[1])+"] - "+self.message+" <> "+self.value+"\n"
+        return "["+str(self.pos[0])+":"+str(self.pos[1])+"] { " + self.type +" } - "+self.message+" <> "+self.value+"\n"
     def __repr__(self) -> str:
-        return "["+str(self.pos[0])+":"+str(self.pos[1])+"] - "+self.message+" <> "+self.value+"\n"
+        return "["+str(self.pos[0])+":"+str(self.pos[1])+"] { " + self.type +" } - "+self.message+" <> "+self.value+"\n"
 
 class ErrorHandler:
     def __init__(self) -> None:

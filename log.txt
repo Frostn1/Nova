@@ -1,2 +1,3 @@
-[1:6] - invalid identifier name <> 
-[1:1] - unexpected flag at CLI <> cc
+[1:6] { naming } - invalid identifier name <> 
+[0:0] { syntax } - unexpected flag at CLI <> cc
+[0:0] { syntax } - unexpected flag at CLI <> daf
