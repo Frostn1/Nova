@@ -16,9 +16,17 @@ def main(argv : list):
         par = lexer.Parser(lex.tokens, lex.handler)
         par.parse()
         sem = lexer.Semantic(par.tokens, par.handler)
-        sem.analyse()
+        errorFlag = False
+        try:
+            sem.analyse()
+        except EOFError as e:
+            errorFlag = True
+        
         gen = lexer.CodeGen(sem.tokens, sem.handler, sem)
-        gen.generate(flagList)
+        if not errorFlag:
+            gen.generate(flagList)
+        else:
+            gen.handler.write()
         
         
 if __name__ == "__main__":

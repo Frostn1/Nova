@@ -110,22 +110,33 @@ class Parser:
                     if self.tokens[index].value == '=':
                         index += 1
                         expression = []
-                        while self.tokens[index].value != ';':
+                        while index < len(self.tokens) and self.tokens[index].value != ';':
                             expression.append(self.tokens[index].value)
                             index += 1
                         if len(expression) < 1:
                             self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[index].line,self.tokens[index].column)))
-                            # print("parser error : missing expression at",self.tokens[index].line,self.tokens[index].column)
-                            # exit(1)
-                        # Check for value or expression
                     else :
                         self.handler.add(errorhandling.Error("parser", "syntax", "missing assignment operator at", (self.tokens[index].line,self.tokens[index].column)))
-                        # print("parser error : missing assignment operator at",self.tokens[index].line,self.tokens[index].column)
-                        # exit(1)
+                        
                 else:
                     self.handler.add(errorhandling.Error("parser", "naming", "invalid identifier name", (self.tokens[index].line,self.tokens[index].column)))
-                    # print("parser error : invalid identifier name at",self.tokens[index].line,self.tokens[index].column,"<>",self.tokens[index].value)
-                    # exit(1)
+                    
+            elif self.tokens[index].value.isidentifier():
+                index += 1
+                if self.tokens[index].value == '=':
+                    index += 1
+                    expression = []
+                    while index < len(self.tokens) and self.tokens[index].value != ';':
+                        expression.append(self.tokens[index].value)
+                        index += 1
+                    if len(expression) < 1:
+                        self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[index].line,self.tokens[index].column)))
+                else :
+                        self.handler.add(errorhandling.Error("parser", "syntax", "missing assignment operator at", (self.tokens[index].line,self.tokens[index].column)))
+                        
+            else:
+                self.handler.add(errorhandling.Error("parser", "naming", "invalid identifier name", (self.tokens[index].line,self.tokens[index].column)))
+                
             index += 1
 
 class Semantic:
@@ -154,7 +165,8 @@ class Semantic:
         #-------------------------------------------------
 
         self.index = 0
-        self.validOperators = [i for i in '+-*/()']
+        self.validOperators = [i for i in '+-*/']
+        self.brackets = [i for i in '()']
     def checkExpression(self, expressionList : list):
         verified = []
         for index, exp in enumerate(expressionList):
@@ -164,6 +176,8 @@ class Semantic:
                 verified.append(self.Symbol("identifier",exp, [], (self.tokens[self.index].line, self.tokens[self.index].column)))
             elif len(exp) == 1 and exp in self.validOperators:
                 verified.append(self.Symbol("operator",exp, [expressionList[index + 1], expressionList[index - 1]], (self.tokens[self.index].line, self.tokens[self.index].column)))
+            elif len(exp) == 1 and exp in self.brackets:
+                verified.append(self.Symbol("bracket",exp, [], (self.tokens[self.index].line, self.tokens[self.index].column)))
             else:
                 self.handler.add(errorhandling.Error("semantic", "symbols", "miss identified symbol", (self.tokens[self.index].line, self.tokens[self.index].column), exp))
                 # print("semantic error : miss identified symbol at", self.tokens[self.index].line, self.tokens[self.index].column,"<>",exp)
@@ -180,23 +194,36 @@ class Semantic:
                 self.handler.add(errorhandling.Error("semantic", "naming", "unmatched variable name", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
                 # print("semantic error : unmatched variable name at",verified[0].pos[0],verified[0].pos[1],"<>",verified[0].value)
                 # exit(1)
+        elif verified[0].type == "bracket":
+            i = 1
+            while i < len(verified) and verified[i].type != "bracket" and verified[i].type != "operator":
+                i += 1
+            if verified[i - 1].type == "identifier":
+                if verified[i - 1].value in self.variables.keys():
+                    lastType = self.variables[verified[i - 1].value].type
+                else:
+                    self.handler.add(errorhandling.Error("semantic", "naming", "unmatched variable name", (verified[i-1].pos[0], verified[i-1].pos[1]), verified[i-1].value))
+                    lastType = "number"
+            else:
+                lastType = verified[i - 1].type
         else:
             lastType = verified[0].type
-        # print("LAST",lastType, verified[0].value,[i.value for i in verified])
         stringList = []
         for index,ver in enumerate(verified):
-            if ver.type != "identifier" and ver.type != lastType and ver.type != "operator":
-                self.handler.add(errorhandling.Error("semantic", "types", "mismatch type", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
-                # print("semantic error : mismatch type at", ver.pos[0], ver.pos[1], "<>",ver.value)
-                # exit(1)
-            elif ver.type == "identifier" and self.variables[ver.value].type != lastType:
-                self.handler.add(errorhandling.Error("semantic", "types", "mismatch type", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
-                # print("semantic error : mismatch type at", ver.pos[0], ver.pos[1], "<>",ver.value)
-                # exit(1)
-            if ver.type == "identifier":
-                stringList.append(self.variables[ver.value].value)
-            else:
-                stringList.append(ver.value)
+            try:
+                if ver.type != "identifier" and ver.type != lastType and ver.type != "operator" and ver.type != "bracket":
+                    self.handler.add(errorhandling.Error("semantic", "types", "missmatch type", (ver.pos[0], ver.pos[1]), ver.value))
+                elif ver.type == "identifier" and (ver.value in self.variables.keys() and self.variables[ver.value].type != lastType):
+                    self.handler.add(errorhandling.Error("semantic", "types", "mismatch type", (ver.pos[0], ver.pos[1]), ver.value))
+                elif ver.type == "identifier" and ver.value not in self.variables.keys():
+                    self.handler.add(errorhandling.Error("semantic", "bounds", "variables used before assignment", (ver.pos[0], ver.pos[1]), ver.value))
+                elif ver.type == "identifier":
+                    stringList.append(self.variables[ver.value].value)
+                else:
+                    stringList.append(ver.value)
+            except UnboundLocalError as e:
+                self.handler.add(errorhandling.Error("semantic", "fatal", "variables used before assignment", (ver.pos[0], ver.pos[1]), ver.value))
+                raise EOFError()
         final = eval("".join(stringList))
         return str(final)
 
@@ -209,11 +236,12 @@ class Semantic:
                     if self.tokens[self.index].value == '=':
                         self.index += 1
                         expression = []
-                        while self.tokens[self.index].value != ';':
-                            # print("index ->",index, self.tokens[index].value)
+                        while self.index < len(self.tokens) and self.tokens[self.index].value != ';':
                             expression.append(self.tokens[self.index].value)
                             self.index += 1
-                        
+                        if len(expression) < 1:
+                            self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[index].line,self.tokens[index].column)))
+
                         finalValue = self.checkExpression(expression)
                         varName = self.tokens[self.index-len(expression)-2].value
                         self.variables[varName] = self.Variable(
@@ -221,6 +249,28 @@ class Semantic:
                                                     finalValue, 
                                                     (self.tokens[self.index-len(expression)-2].line,  self.tokens[self.index-len(expression)-2].column),
                                                     self.variables)
+            elif self.tokens[self.index].value.isidentifier():
+                self.index += 1
+                if self.tokens[self.index].value == '=':
+                    self.index += 1
+                    expression = []
+                    while self.tokens[self.index].value != ';':
+                        expression.append(self.tokens[self.index].value)
+                        self.index += 1
+                    if len(expression) < 1:
+                        self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[index].line,self.tokens[index].column)))
+                    finalValue = self.checkExpression(expression)
+                    varName = self.tokens[self.index-len(expression)-2].value
+                    self.variables[varName] = self.Variable(
+                                                varName, 
+                                                finalValue, 
+                                                (self.tokens[self.index-len(expression)-2].line,  self.tokens[self.index-len(expression)-2].column),
+                                                self.variables)
+                else :
+                        self.handler.add(errorhandling.Error("parser", "syntax", "missing assignment operator at", (self.tokens[index].line,self.tokens[index].column)))
+                        
+            else:
+                self.handler.add(errorhandling.Error("parser", "naming", "invalid identifier name", (self.tokens[index].line,self.tokens[index].column)))
             self.index += 1
     
 
@@ -242,12 +292,12 @@ class CodeGen:
         for flag in flags:
             if flag[0] != '-' or len(flag) - flag.count('-') < 1:
                 self.handler.add(errorhandling.Error("generator", "syntax", "unexpected flag at CLI",(0,0),flag))
-            elif (flag[2:] == flagChecks[0].longname or flag[1:] == flagChecks[0].shortname) and not flagChecks[0].used:
-                flagChecks[0].used = True
-                self.cgenrate()
             elif (flag[2:] == flagChecks[1].longname or flag[1:] == flagChecks[1].shortname) and not flagChecks[1].used:
                 flagChecks[1].used = True
                 self.handler.write()
+            elif (flag[2:] == flagChecks[0].longname or flag[1:] == flagChecks[0].shortname) and not flagChecks[0].used:
+                flagChecks[0].used = True
+                self.cgenrate()
             elif (flag[2:] == flagChecks[2].longname or flag[1:] == flagChecks[2].shortname) and not flagChecks[2].used:
                 flagChecks[2].used = True
                 print("-pf flag")
@@ -282,6 +332,15 @@ class CodeGen:
                         index += 1
                     new.write('\t' + guesstype(expression))
                     new.write(' ' +  self.tokens[index-len(expression) - 2].value)
+                    new.write(' ' + self.tokens[index-len(expression) - 1].value)
+                    new.write(' ' + ' '.join(expression) + ';\n')
+                if self.tokens[index].value in self.sem.variables.keys():
+                    index += 2
+                    expression = []
+                    while index < len(self.tokens) - 1 and self.tokens[index].value != ';':   
+                        expression.append(self.tokens[index].value)
+                        index += 1
+                    new.write('\t' +  self.tokens[index-len(expression) - 2].value)
                     new.write(' ' + self.tokens[index-len(expression) - 1].value)
                     new.write(' ' + ' '.join(expression) + ';\n')
                 index += 1

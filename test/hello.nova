@@ -1,3 +1,1 @@
-let x = 1;
-let z = 3.2;
-let y = (z + 5) * 2;
+let x = 2 + 1;
