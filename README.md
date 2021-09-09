@@ -10,13 +10,13 @@
 ## TODO
 ### Current
 - [ ] CLI flags support
-- [ ] Variable assignment
 
 ### Future
 - [ ] strings support
 - [ ] Interpreter Version
 
 ### Finished
+- [x] Variable assignment
 - [x] Error log support
 - [x] Add Error Support
 - [x] Convert to C
