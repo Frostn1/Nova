@@ -77,10 +77,12 @@ class Lexer:
 
 
 class Parser:
-    def __init__(self,lex : Lexer):
-        self.tokens = lex.tokens
-        self.handler = lex.handler
+    def __init__(self,tokens, handler):
+        self.tokens = tokens
+        self.handler = handler
         self.tokens = self.removeComments()
+        for error in self.handler.errorList:
+            print(error)
     def removeComments(self):
         index = 0
         while index < len(self.tokens):
@@ -118,12 +120,13 @@ class Parser:
                             # exit(1)
                         # Check for value or expression
                     else :
-                        self.handler.add(errorhandling.Error())
-                        print("parser error : missing assignment operator at",self.tokens[index].line,self.tokens[index].column)
-                        exit(1)
+                        self.handler.add(errorhandling.Error("parser", "syntax", "missing assignment operator at", (self.tokens[index].line,self.tokens[index].column)))
+                        # print("parser error : missing assignment operator at",self.tokens[index].line,self.tokens[index].column)
+                        # exit(1)
                 else:
-                    print("parser error : invalid identifier name at",self.tokens[index].line,self.tokens[index].column,"<>",self.tokens[index].value)
-                    exit(1)
+                    self.handler.add(errorhandling.Error("parser", "naming", "invalid identifier name", (self.tokens[index].line,self.tokens[index].column)))
+                    # print("parser error : invalid identifier name at",self.tokens[index].line,self.tokens[index].column,"<>",self.tokens[index].value)
+                    # exit(1)
             index += 1
 
 class Semantic:
@@ -144,11 +147,10 @@ class Semantic:
                 self.type = "number"
             elif self.value.isidentifier():
                 self.type = _vars[self.value].type
-    def __init__(self, lex : Lexer):
-        self.tokens = lex.tokens
+    def __init__(self, tokens, handler):
+        self.tokens = tokens
         self.variables = {}
-        self.handler = lex.handler
-
+        self.handler = handler
         #-------------------------------------------------
 
         self.validOperators = [i for i in '+-*/()']
@@ -162,27 +164,33 @@ class Semantic:
             elif len(exp) == 1 and exp in self.validOperators:
                 verified.append(self.Symbol("operator",exp, [expressionList[index + 1], expressionList[index - 1]], (self.tokens[self.index].line, self.tokens[self.index].column)))
             else:
-                print("semantic error : miss identified symbol at", self.tokens[self.index].line, self.tokens[self.index].column,"<>",exp)
-                exit(1)
+                self.handler.add(errorhandling.Error("semantic", "symbols", "miss identified symbol", (self.tokens[self.index].line, self.tokens[self.index].column), exp))
+                # print("semantic error : miss identified symbol at", self.tokens[self.index].line, self.tokens[self.index].column,"<>",exp)
+                # exit(1)
         
         if verified[0].type == "operator":
-            print("semantic error : first value can't be an operator at",verified[0].pos[0], verified[0].pos[1])
+            self.handler.add(errorhandling.Error("semantic", "syntax", "first value can't be an operator", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
+            # print("semantic error : first value can't be an operator at",verified[0].pos[0], verified[0].pos[1])
+            # exit(1)
         if verified[0].type == "identifier":
             if verified[0].value in self.variables.keys():
                 lastType = self.variables[verified[0].value].type
             else:
-                print("semantic error : unmatched variable name at",verified[0].pos[0],verified[0].pos[1],"<>",verified[0].value)
-                exit(1)
+                self.handler.add(errorhandling.Error("semantic", "naming", "unmatched variable name", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
+                # print("semantic error : unmatched variable name at",verified[0].pos[0],verified[0].pos[1],"<>",verified[0].value)
+                # exit(1)
         else:
             lastType = verified[0].type
         stringList = []
         for index,ver in enumerate(verified):
             if ver.type != "identifier" and ver.type != lastType and ver.type != "operator":
-                print("semantic error : mismatch type at", ver.pos[0], ver.pos[1], "<>",ver.value)
-                exit(1)
+                self.handler.add(errorhandling.Error("semantic", "types", "mismatch type", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
+                # print("semantic error : mismatch type at", ver.pos[0], ver.pos[1], "<>",ver.value)
+                # exit(1)
             elif ver.type == "identifier" and self.variables[ver.value].type != lastType:
-                print("semantic error : mismatch type at", ver.pos[0], ver.pos[1], "<>",ver.value)
-                exit(1)
+                self.handler.add(errorhandling.Error("semantic", "types", "mismatch type", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
+                # print("semantic error : mismatch type at", ver.pos[0], ver.pos[1], "<>",ver.value)
+                # exit(1)
             if ver.type == "identifier":
                 stringList.append(self.variables[ver.value].value)
             else:
@@ -204,9 +212,7 @@ class Semantic:
                             # print("index ->",index, self.tokens[index].value)
                             expression.append(self.tokens[self.index].value)
                             self.index += 1
-                        if len(expression) < 1:
-                            print("parser error : missing expression at",self.tokens[self.index].line,self.tokens[self.index].column)
-                            exit(1)
+                        
                         finalValue = self.checkExpression(expression)
                         varName = self.tokens[self.index-len(expression)-2].value
                         self.variables[varName] = self.Variable(
@@ -214,24 +220,16 @@ class Semantic:
                                                     finalValue, 
                                                     (self.tokens[self.index-len(expression)-2].line,  self.tokens[self.index-len(expression)-2].column),
                                                     self.variables)
-                        # Check for value or expression
-                    else :
-                        print("parser error : missing assignment operator at",self.tokens[self.index].line,self.tokens[self.index].column)
-                        exit(1)
-                else:
-                    print("parser error : invalid iden at",self.tokens[self.index].line,self.tokens[self.index].column)
-                    exit(1)
             self.index += 1
     
 
 class CodeGen:
-    def __init__(self, lex : Lexer) -> None:
-        self.tokens = lex.tokens
-        self.handler = lex.handler
+    def __init__(self, tokens, handler) -> None:
+        self.tokens = tokens
+        self.handler = handler
 
     def generate(self, flags : list) -> None:
         for flag in flags:
             if flag[0] != '-':
-                print("generator error : unexpected flag at CLI <>",flag)
-                exit(1)
-        print(flags)
+                self.handler.add(errorhandling.Error("generator", "syntax", "unexpected flag at CLI", missValue=flag))
+        self.handler.write()

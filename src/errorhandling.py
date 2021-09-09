@@ -18,11 +18,11 @@ class ErrorHandler:
         self.errorList = []
 
     def write(self, outfile = "log.txt"):
-        with open(outfile, 'r') as filep:
+        with open(outfile, 'w') as filep:
             if not filep.writable():
                 print("output file not writeable")
                 exit(1)
             for error in self.errorList:
-                filep.write(error)
+                filep.write(str(error))
     def add(self, error : Error):
         self.errorList.append(error)

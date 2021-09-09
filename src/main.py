@@ -13,9 +13,12 @@ def main(argv : list):
         if len(argv) > 1:
             flagList = argv[2:]
         lex = lexer.Lexer(fileContent, argv[1], fileP).lexify()
-        lexer.Parser(lex).parse()
-        lexer.Semantic(lex).analyse()
-        lexer.CodeGen(lex).generate(flagList)
+        par = lexer.Parser(lex.tokens, lex.handler)
+        par.parse()
+        sem = lexer.Semantic(par.tokens, par.handler)
+        sem.analyse()
+        gen = lexer.CodeGen(sem.tokens, sem.handler)
+        gen.generate(flagList)
         
         
 if __name__ == "__main__":
