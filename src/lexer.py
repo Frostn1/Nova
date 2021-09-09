@@ -140,6 +140,7 @@ class Semantic:
             self.name = name
             self.value = value
             self.pos = pos
+            self.type = ""
             self.getType(variables)
         def getType(self, _vars):
             if self.value.isnumeric():
@@ -229,11 +230,12 @@ class CodeGen:
             self.shortname = shortname
             self.longname = longname
             self.used = False
-    def __init__(self, tokens, handler, filepath = 'default.c') -> None:
+    def __init__(self, tokens, handler, sem, filepath = 'default.c') -> None:
         self.tokens = tokens
         self.handler = handler
         self.filepath = filepath
-        self.sem = Semantic(self.tokens,errorhandling.ErrorHandler())
+        self.sem = sem
+        self.sem.index = 0
     
     def generate(self, flags : list) -> None:
         flagChecks = [self.Flag("cf","cformat"),self.Flag("le","logerrors"),self.Flag("pf","printfunctions"),self.Flag("e","export")]
@@ -268,7 +270,6 @@ class CodeGen:
                 for include in formalIncludes:
                     new.write('#include <'+include+'>\n')
                 new.write('\nint main(int argc, char** argv) {\n')
-
         newfile(self.filepath)
         with open(self.filepath,'a') as new:
             index = 0
@@ -276,7 +277,7 @@ class CodeGen:
                 if self.tokens[index].value == 'let':
                     index += 3
                     expression = []
-                    while index < len(self.tokens) - 1 and self.tokens[index + 1] != ';':   
+                    while index < len(self.tokens) - 1 and self.tokens[index].value != ';':   
                         expression.append(self.tokens[index].value)
                         index += 1
                     new.write('\t' + guesstype(expression))

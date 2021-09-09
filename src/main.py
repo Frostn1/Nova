@@ -17,7 +17,7 @@ def main(argv : list):
         par.parse()
         sem = lexer.Semantic(par.tokens, par.handler)
         sem.analyse()
-        gen = lexer.CodeGen(sem.tokens, sem.handler)
+        gen = lexer.CodeGen(sem.tokens, sem.handler, sem)
         gen.generate(flagList)
         
         

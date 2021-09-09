@@ -3,5 +3,7 @@
 #include <string.h>
 
 int main(int argc, char** argv) {
-	float x = 12.3;
+	int x = 1;
+	float z = 3.2;
+	float y = z + 5;
 }
