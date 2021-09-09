@@ -1,7 +1,7 @@
 # Nova
 ## TODO
-[] Add CLI flags support
+- [ ] Add CLI flags support
 
-[] Add strings support
+- [ ] Add strings support
 
-[x] Add Error Support
+- [x] Add Error Support
