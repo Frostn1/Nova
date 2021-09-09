@@ -256,7 +256,6 @@ class CodeGen:
     def cgenrate(self):
         def guesstype(expression):
             exp = self.sem.checkExpression(expression)
-            print("exp", exp)
             if exp.isnumeric() or ('.' in exp and exp[exp.index('.')+1:].isnumeric() and exp[:exp.index('.')].isnumeric() and exp[:exp.index('.')][0] == '0'):
                 return 'int'
             elif ('.' in exp and exp[exp.index('.')+1:].isnumeric() and exp[:exp.index('.')].isnumeric()):

@@ -12,6 +12,6 @@
 - [x] Error log support
 - [ ] CLI flags support
 - [x] Add Error Support
-- [ ] Convert to C
+- [x] Convert to C
 ### Future
 - [ ] strings support
