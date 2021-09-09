@@ -13,7 +13,7 @@ class Lexer:
         self.check = ""
         #-------------------------------
 
-        self.symbols = ['{', '}', '(', ')', '[', ']', '.', '"', '*', '\n', ':', ',',';'] # single-char keywords
+        self.symbols = ['{', '}', '(', ')', '[', ']', '"', '*', '\n', ':', ',',';'] # single-char keywords
         self.other_symbols = ['\\', '/*', '*/'] # multi-char keywords
         self.arthemic = ['=','+','-','*','/']
         self.KEYWORDS = self.symbols + self.other_symbols + self.arthemic
@@ -79,7 +79,25 @@ class Lexer:
 class Parser:
     def __init__(self,lex : Lexer):
         self.tokens = lex.tokens
-    
+        self.tokens = self.removeComments()
+    def removeComments(self):
+        index = 0
+        while index < len(self.tokens):
+            if index < len(self.tokens) - 1 and self.tokens[index].value + self.tokens[index + 1].value == "//":
+                currentLine = self.tokens[index].line
+                lineFlag = True
+                self.tokens.pop(index)
+                self.tokens.pop(index)
+                while index < len(self.tokens) and lineFlag:
+                    if self.tokens[index].line == currentLine:
+                        self.tokens.pop(index)
+                    else:
+                        lineFlag = False
+            if index < len(self.tokens) and self.tokens[index].value == '':
+                self.tokens.pop(index)
+            else:
+                index += 1
+        return self.tokens
     def parse(self):
         index = 0
         while index < len(self.tokens):
@@ -117,13 +135,12 @@ class Semantic:
             self.name = name
             self.value = value
             self.pos = pos
-            self.type = self.getType(variables)
+            self.getType(variables)
         def getType(self, _vars):
             if self.value.isnumeric():
                 self.type = "number"
-            elif self.value.identifier():
+            elif self.value.isidentifier():
                 self.type = _vars[self.value].type
-            return self.type
     def __init__(self, par : Parser):
         self.tokens = par.tokens
         self.variables = {}
@@ -133,21 +150,24 @@ class Semantic:
     def checkExpression(self, expressionList : list):
         verified = []
         for index, exp in enumerate(expressionList):
-            if exp.isnumeric():
+            if exp.isnumeric() or ('.' in exp and exp[exp.index('.')+1:].isnumeric() and exp[:exp.index('.')].isnumeric()):
                 verified.append(self.Symbol("number", exp, [], (self.tokens[self.index].line, self.tokens[self.index].column)))
             elif exp.isidentifier():
                 verified.append(self.Symbol("identifier",exp, [], (self.tokens[self.index].line, self.tokens[self.index].column)))
             elif len(exp) == 1 and exp in self.validOperators:
                 verified.append(self.Symbol("operator",exp, [expressionList[index + 1], expressionList[index - 1]], (self.tokens[self.index].line, self.tokens[self.index].column)))
             else:
-                print("semantic error : miss identified symbol at", self.tokens[self.index].line, self.tokens[self.index].column,"<>",self.tokens[self.index].value)
+                print("semantic error : miss identified symbol at", self.tokens[self.index].line, self.tokens[self.index].column,"<>",exp)
                 exit(1)
         
         if verified[0].type == "operator":
             print("semantic error : first value can't be an operator at",verified[0].pos[0], verified[0].pos[1])
         if verified[0].type == "identifier":
-            lastType = self.variables[verified[0].value].type
-            print(verified[0].value, [i for i in self.variables], self.variables[verified[0].value].type)
+            if verified[0].value in self.variables.keys():
+                lastType = self.variables[verified[0].value].type
+            else:
+                print("semantic error : unmatched variable name at",verified[0].pos[0],verified[0].pos[1],"<>",verified[0].value)
+                exit(1)
         else:
             lastType = verified[0].type
         stringList = []
@@ -164,7 +184,6 @@ class Semantic:
                 stringList.append(ver.value)
         final = eval("".join(stringList))
         return str(final)
-        # print("Final answer", final)
 
     def analyse(self):
         self.index = 0
