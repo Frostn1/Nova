@@ -1,3 +1,5 @@
+import errorhandling
+
 class Token:
     def __init__(self, _id : int, value : str, line : int, column : int):
         self.id = _id
@@ -11,6 +13,8 @@ class Lexer:
         self.filePath = filePath
         self.filePointer = filePointer
         self.check = ""
+
+        self.handler = errorhandling.ErrorHandler()
         #-------------------------------
 
         self.symbols = ['{', '}', '(', ')', '[', ']', '"', '*', '\n', ':', ',',';'] # single-char keywords
@@ -24,14 +28,11 @@ class Lexer:
         self.line = 1
         self.column = 1
         self.id = 1
-    def addLetter(self, currentChar : chr):
-        self.check += currentChar
     def lexify(self):
         length = len(self.code)
         white_space = ' '
         lexeme = ''
         for index,char in enumerate(self.code):
-            self.addLetter(char)
             if char == '*':
                 if self.code[index-1] == '/':
                     lexeme += '/*'
@@ -45,9 +46,9 @@ class Lexer:
                 else:
                     continue
             elif char != white_space:
-                lexeme += char # adding a char each time
-            if (index + 1 < length): # prevents error
-                if self.code[index+1] == white_space or self.code[index+1] in self.KEYWORDS or lexeme in self.KEYWORDS: # if next char == ' '
+                lexeme += char
+            if (index + 1 < length):
+                if self.code[index+1] == white_space or self.code[index+1] in self.KEYWORDS or lexeme in self.KEYWORDS:
                     if lexeme != '':
                         if '\n' in lexeme:
                             self.line += 1
@@ -71,7 +72,6 @@ class Lexer:
                     lexeme = ''
         return self
     def printTokens(self):
-        print("[Check] =>",self.check)
         for token in self.tokens:
             print("[ TOKEN ] -> \n\tvalue :",token.value,"\n\tline :",token.line,"\n\tcolumn :",token.column)
 
@@ -79,6 +79,7 @@ class Lexer:
 class Parser:
     def __init__(self,lex : Lexer):
         self.tokens = lex.tokens
+        self.handler = lex.handler
         self.tokens = self.removeComments()
     def removeComments(self):
         index = 0
@@ -112,10 +113,12 @@ class Parser:
                             expression.append(self.tokens[index].value)
                             index += 1
                         if len(expression) < 1:
-                            print("parser error : missing expression at",self.tokens[index].line,self.tokens[index].column)
-                            exit(1)
+                            self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[index].line,self.tokens[index].column)))
+                            # print("parser error : missing expression at",self.tokens[index].line,self.tokens[index].column)
+                            # exit(1)
                         # Check for value or expression
                     else :
+                        self.handler.add(errorhandling.Error())
                         print("parser error : missing assignment operator at",self.tokens[index].line,self.tokens[index].column)
                         exit(1)
                 else:
@@ -141,9 +144,11 @@ class Semantic:
                 self.type = "number"
             elif self.value.isidentifier():
                 self.type = _vars[self.value].type
-    def __init__(self, par : Parser):
-        self.tokens = par.tokens
+    def __init__(self, lex : Lexer):
+        self.tokens = lex.tokens
         self.variables = {}
+        self.handler = lex.handler
+
         #-------------------------------------------------
 
         self.validOperators = [i for i in '+-*/()']
@@ -219,3 +224,14 @@ class Semantic:
             self.index += 1
     
 
+class CodeGen:
+    def __init__(self, lex : Lexer) -> None:
+        self.tokens = lex.tokens
+        self.handler = lex.handler
+
+    def generate(self, flags : list) -> None:
+        for flag in flags:
+            if flag[0] != '-':
+                print("generator error : unexpected flag at CLI <>",flag)
+                exit(1)
+        print(flags)
