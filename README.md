@@ -9,9 +9,15 @@
 
 ## TODO
 ### Current
-- [x] Error log support
 - [ ] CLI flags support
-- [x] Add Error Support
-- [x] Convert to C
+- [ ] Variable assignment
+
 ### Future
 - [ ] strings support
+- [ ] Interpreter Version
+
+### Finished
+- [x] Error log support
+- [x] Add Error Support
+- [x] Convert to C
+- [x] Type Deduction

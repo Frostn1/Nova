@@ -5,5 +5,5 @@
 int main(int argc, char** argv) {
 	int x = 1;
 	float z = 3.2;
-	float y = z + 5;
+	float y = ( z + 5 ) * 2;
 }
