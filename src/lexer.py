@@ -80,8 +80,11 @@ class Parser:
         self.tokens = tokens
         self.handler = handler
         self.tokens = self.removeComments()
-        for error in self.handler.errorList:
-            print(error)
+        
+        #----------------------------------
+
+        self.functionState = 0
+        self.currentFunction = ""
     def removeComments(self):
         index = 0
         while index < len(self.tokens):
@@ -120,7 +123,27 @@ class Parser:
                         
                 else:
                     self.handler.add(errorhandling.Error("parser", "naming", "invalid identifier name", (self.tokens[index].line,self.tokens[index].column)))
-                    
+            elif self.tokens[index].value == 'fn':
+                index += 1
+                if self.tokens[index].value.isidentifier():
+                    index += 1
+                    if self.tokens[index].value == '(':
+                        index += 1
+                        args = []
+                        while self.tokens[index].value != ')' and self.tokens[index].value != '{':
+                            if self.tokens[index].value != ',':
+                                args.append(self.tokens[index].value)
+                            index += 1
+                        if self.tokens[index].value == '{':
+                            self.handler.add(errorhandling.Error("parser", "syntax", "missing closing on function define", (self.tokens[index].line,self.tokens[index].column)), ')')
+                        else :
+                            index += 1
+                            for arg in args:
+                                if not arg.isidentifier():
+                                    self.handler.add(errorhandling.Error("parser", "naming", "invalid identifier name", (self.tokens[index].line,self.tokens[index].column)), arg)
+                            self.functionState += 1
+            elif self.tokens[index].value == '}' and not self.functionState:
+                self.handler.add(errorhandling.Error("parser", "syntax", "unexpected char", (self.tokens[index].line,self.tokens[index].column)), "}")
             elif self.tokens[index].value.isidentifier():
                 index += 1
                 if self.tokens[index].value == '=':
@@ -135,7 +158,7 @@ class Parser:
                         self.handler.add(errorhandling.Error("parser", "syntax", "missing assignment operator at", (self.tokens[index].line,self.tokens[index].column)))
                         
             else:
-                self.handler.add(errorhandling.Error("parser", "naming", "invalid identifier name", (self.tokens[index].line,self.tokens[index].column)))
+                self.handler.add(errorhandling.Error("parser", "syntax", "unexpected token", (self.tokens[index].line,self.tokens[index].column)))
                 
             index += 1
 
@@ -158,15 +181,29 @@ class Semantic:
                 self.type = "number"
             elif self.value.isidentifier():
                 self.type = _vars[self.value].type
+
+    class Function(Variable):
+        def __init__(self, name : str, args : list, pos : tuple, variables) -> None:
+            super.__init__(name, "", pos, variables)
+            self.name = name
+            self.args = args
     def __init__(self, tokens, handler):
         self.tokens = tokens
         self.variables = {}
+        self.functions = {}
         self.handler = handler
+
         #-------------------------------------------------
 
-        self.index = 0
         self.validOperators = [i for i in '+-*/']
         self.brackets = [i for i in '()']
+
+        #-------------------------------------------------
+        
+        self.index = 0
+        self.functionState = 0
+        self.currentFunction = ""
+
     def checkExpression(self, expressionList : list):
         verified = []
         for index, exp in enumerate(expressionList):
@@ -249,6 +286,28 @@ class Semantic:
                                                     finalValue, 
                                                     (self.tokens[self.index-len(expression)-2].line,  self.tokens[self.index-len(expression)-2].column),
                                                     self.variables)
+            elif self.tokens[index].value == 'fn':
+                index += 1
+                if self.tokens[index].value.isidentifier():
+                    index += 1
+                    if self.tokens[index].value == '(':
+                        index += 1
+                        args = []
+                        while self.tokens[index].value != ')' and self.tokens[index].value != '{':
+                            if self.tokens[index].value != ',':
+                                args.append(self.tokens[index].value)
+                            index += 1
+                        if self.tokens[index].value == '{':
+                            self.handler.add(errorhandling.Error("parser", "syntax", "missing closing on function define", (self.tokens[index].line,self.tokens[index].column)), ')')
+                        else :
+                            index += 1
+                            for arg in args:
+                                if not arg.isidentifier():
+                                    self.handler.add(errorhandling.Error("parser", "naming", "invalid identifier name", (self.tokens[index].line,self.tokens[index].column)), arg)
+                            self.functionState += 1
+            elif self.tokens[index].value
+            elif self.tokens[index].value == '}' and self.functionState:
+                self.functionState -= 1
             elif self.tokens[self.index].value.isidentifier():
                 self.index += 1
                 if self.tokens[self.index].value == '=':
