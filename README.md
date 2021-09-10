@@ -10,10 +10,13 @@
 ## TODO
 ### Current
 - [ ] CLI flags support
-
+- [ ] Functions
+- [ ] Dynamic functions
 ### Future
 - [ ] strings support
 - [ ] Interpreter Version
+- [ ] C lib for nova
+- [ ] Link variables
 
 ### Finished
 - [x] Variable assignment
