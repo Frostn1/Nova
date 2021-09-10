@@ -184,11 +184,12 @@ class Semantic:
 
     class Function(Variable):
         def __init__(self, name : str, args : list, pos : tuple, index : int, variables) -> None:
-            super.__init__(name, "0", pos, variables)
             self.name = name
             self.args = args
             self.tokens = []
             self.index = index
+            super(Function, self).__init__(name, "0", pos, variables)
+            
     def __init__(self, tokens, handler):
         self.tokens = tokens
         self.variables = {}
@@ -288,41 +289,41 @@ class Semantic:
                                                     finalValue, 
                                                     (self.tokens[self.index-len(expression)-2].line,  self.tokens[self.index-len(expression)-2].column),
                                                     self.variables)
-            elif self.tokens[index].value == 'fn':
-                index += 1
-                if self.tokens[index].value.isidentifier():
-                    index += 1
-                    if self.tokens[index].value == '(':
-                        index += 1
+            elif self.tokens[self.index].value == 'fn':
+                self.index += 1
+                if self.tokens[self.index].value.isidentifier():
+                    self.index += 1
+                    if self.tokens[self.index].value == '(':
+                        self.index += 1
                         args = []
-                        while self.tokens[index].value != ')' and self.tokens[index].value != '{':
-                            if self.tokens[index].value != ',':
-                                args.append(self.tokens[index].value)
-                            index += 1
-                        if self.tokens[index].value == '{':
-                            self.handler.add(errorhandling.Error("parser", "syntax", "missing closing on function define", (self.tokens[index].line,self.tokens[index].column), ')'))
+                        while self.tokens[self.index].value != ')' and self.tokens[self.index].value != '{':
+                            if self.tokens[self.index].value != ',':
+                                args.append(self.tokens[self.index].value)
+                            self.index += 1
+                        if self.tokens[self.index].value == '{':
+                            self.handler.add(errorhandling.Error("parser", "syntax", "missing closing on function define", (self.tokens[self.index].line,self.tokens[self.index].column), ')'))
                         else :
-                            index += 1
+                            self.index += 1
                             for arg in args:
                                 if not arg.isidentifier():
-                                    self.handler.add(errorhandling.Error("parser", "naming", "invalid identifier name", (self.tokens[index].line,self.tokens[index].column), arg))
-                            self.functions[self.currentFunction] = self.Function(self.currentFunction, args, (self.tokens[index].line,self.tokens[index].column), index, self.variables)
+                                    self.handler.add(errorhandling.Error("parser", "naming", "invalid identifier name", (self.tokens[self.index].line,self.tokens[self.index].column), arg))
+                            self.functions[self.currentFunction] = self.Function(self.currentFunction, args, (self.tokens[self.index].line,self.tokens[self.index].column), self.index, self.variables)
                             self.functionState += 1
-            elif self.tokens[index].value == "return" and self.functionState:
-                index += 1
+            elif self.tokens[self.index].value == "return" and self.functionState:
+                self.index += 1
                 expression = []
                 while self.tokens[self.index].value != ';':
                     expression.append(self.tokens[self.index].value)
                     self.index += 1
                 if len(expression) < 1:
-                    self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[index].line,self.tokens[index].column)))
+                    self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[self.index].line,self.tokens[self.index].column)))
                 finalValue = self.checkExpression(expression)
                 self.functions[self.currentFunction].value = finalValue
                 self.functions[self.currentFunction].getType()
-            elif self.tokens[index].value == '}' and self.functionState:
+            elif self.tokens[self.index].value == '}' and self.functionState:
                 self.variables[self.currentFunction] = self.functions[self.currentFunction]
-                self.functions[self.currentFunction].tokens = self.tokens[self.functions[self.currentFunction].index:index]
-                print("Token Check", [i.value for i in self.tokens[self.functions[self.currentFunction].index:index]])
+                self.functions[self.currentFunction].tokens = self.tokens[self.functions[self.currentFunction].index:self.index]
+                print("Token Check", [i.value for i in self.tokens[self.functions[self.currentFunction].index:self.index]])
                 self.functionState -= 1
                 self.currentFunction = ""
             elif self.tokens[self.index].value.isidentifier():
