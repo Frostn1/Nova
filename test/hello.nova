@@ -1,1 +1,2 @@
-let x = 2 + 1;
+let x = 1;
+link y = x + 5;

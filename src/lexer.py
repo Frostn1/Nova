@@ -334,7 +334,14 @@ class CodeGen:
                     new.write(' ' +  self.tokens[index-len(expression) - 2].value)
                     new.write(' ' + self.tokens[index-len(expression) - 1].value)
                     new.write(' ' + ' '.join(expression) + ';\n')
-                if self.tokens[index].value in self.sem.variables.keys():
+                elif self.tokens[index].value == 'link':
+                    index += 3
+                    expression = []
+                    while index < len(self.tokens) - 1 and self.tokens[index].value != ';':   
+                        expression.append(self.tokens[index].value)
+                        index += 1
+                    print(expression, self.tokens[index-len(expression) - 2].value)
+                elif self.tokens[index].value in self.sem.variables.keys():
                     index += 2
                     expression = []
                     while index < len(self.tokens) - 1 and self.tokens[index].value != ';':   
