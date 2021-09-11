@@ -183,13 +183,13 @@ class Semantic:
                 self.type = _vars[self.value].type
 
     class Function(Variable):
-        def __init__(self, name : str, args : list, pos : tuple, index : int, variables) -> None:
+        def __init__(self, name: str, value: str, pos: tuple, variables, index, args) -> None:
+            super().__init__(name, "0", pos, variables)
             self.name = name
             self.args = args
             self.tokens = []
             self.index = index
-            super(Function, self).__init__(name, "0", pos, variables)
-            
+            # super(type(),self).__init__(name, "0", pos, variables)
     def __init__(self, tokens, handler):
         self.tokens = tokens
         self.variables = {}
@@ -280,7 +280,7 @@ class Semantic:
                             expression.append(self.tokens[self.index].value)
                             self.index += 1
                         if len(expression) < 1:
-                            self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[index].line,self.tokens[index].column)))
+                            self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[self.index].line,self.tokens[self.index].column)))
 
                         finalValue = self.checkExpression(expression)
                         varName = self.tokens[self.index-len(expression)-2].value
@@ -307,7 +307,8 @@ class Semantic:
                             for arg in args:
                                 if not arg.isidentifier():
                                     self.handler.add(errorhandling.Error("parser", "naming", "invalid identifier name", (self.tokens[self.index].line,self.tokens[self.index].column), arg))
-                            self.functions[self.currentFunction] = self.Function(self.currentFunction, args, (self.tokens[self.index].line,self.tokens[self.index].column), self.index, self.variables)
+                            self.index += 1
+                            self.functions[self.currentFunction] = self.Function(name=self.currentFunction, args=args, pos=(self.tokens[self.index].line,self.tokens[self.index].column), index=self.index, variables=self.variables, value="09")
                             self.functionState += 1
             elif self.tokens[self.index].value == "return" and self.functionState:
                 self.index += 1
@@ -319,7 +320,7 @@ class Semantic:
                     self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[self.index].line,self.tokens[self.index].column)))
                 finalValue = self.checkExpression(expression)
                 self.functions[self.currentFunction].value = finalValue
-                self.functions[self.currentFunction].getType()
+                self.functions[self.currentFunction].getType(self.variables)
             elif self.tokens[self.index].value == '}' and self.functionState:
                 self.variables[self.currentFunction] = self.functions[self.currentFunction]
                 self.functions[self.currentFunction].tokens = self.tokens[self.functions[self.currentFunction].index:self.index]
@@ -335,7 +336,7 @@ class Semantic:
                         expression.append(self.tokens[self.index].value)
                         self.index += 1
                     if len(expression) < 1:
-                        self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[index].line,self.tokens[index].column)))
+                        self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[self.index].line,self.tokens[self.index].column)))
                     finalValue = self.checkExpression(expression)
                     varName = self.tokens[self.index-len(expression)-2].value
                     self.variables[varName] = self.Variable(
@@ -344,10 +345,10 @@ class Semantic:
                                                 (self.tokens[self.index-len(expression)-2].line,  self.tokens[self.index-len(expression)-2].column),
                                                 self.variables)
                 else :
-                        self.handler.add(errorhandling.Error("parser", "syntax", "missing assignment operator at", (self.tokens[index].line,self.tokens[index].column)))
+                        self.handler.add(errorhandling.Error("parser", "syntax", "missing assignment operator at", (self.tokens[self.index].line,self.tokens[self.index].column)))
                         
             else:
-                self.handler.add(errorhandling.Error("parser", "naming", "invalid identifier name", (self.tokens[index].line,self.tokens[index].column)))
+                self.handler.add(errorhandling.Error("parser", "naming", "invalid identifier name", (self.tokens[self.index].line,self.tokens[self.index].column)))
             self.index += 1
     
 
