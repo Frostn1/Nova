@@ -1,3 +1,4 @@
+from types import FunctionType
 import errorhandling
 
 class Token:
@@ -390,16 +391,31 @@ class CodeGen:
                 return 'int'
             elif ('.' in exp and exp[exp.index('.')+1:].isnumeric() and exp[:exp.index('.')].isnumeric()):
                 return 'float'
-
+        def writetokens(new, tokens):
+            '''
+            @new : new file pointer to output file
+            @tokens : tokens to write out to output file
+            '''
+            pass
+        def writefunctions(filep, functions):
+            for function in functions:
+                function = Semantic.Function(function)
+                filep.write(guesstype(function.value) + ' ')
+                filep.write(function.name + ''
         def newfile(path, includes = []):
             with open(path, 'w') as new:
                 formalIncludes = ['stdio.h','stdlib.h', 'string.h']
                 formalIncludes += includes
                 for include in formalIncludes:
                     new.write('#include <'+include+'>\n')
-                new.write('\nint main(int argc, char** argv) {\n')
+                if len(self.sem.functions):
+                    writefunctions(self.sem.functions) 
+
+        
         newfile(self.filepath)
+
         with open(self.filepath,'a') as new:
+            new.write('\nint main(int argc, char** argv) {\n')
             index = 0
             while index < len(self.tokens):
                 if self.tokens[index].value == 'let':
