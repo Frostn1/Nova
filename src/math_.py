@@ -136,4 +136,4 @@ class calc:
             return int_res
         return res
 
-print(calc.calc_post(convertor.postinfix([i for i in '3!+2*(4*3)']), errorhandling.ErrorHandler(), "semantic", (0,0), {}))
+# print(calc.calc_post(convertor.postinfix([i for i in '3!+2*(4*3)']), errorhandling.ErrorHandler(), "semantic", (0,0), {}))

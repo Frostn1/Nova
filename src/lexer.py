@@ -303,7 +303,6 @@ class Semantic:
             elif self.tokens[self.index].value == '}' and self.functionState:
                 self.variables[self.currentFunction] = self.functions[self.currentFunction]
                 self.functions[self.currentFunction].tokens = self.tokens[self.functions[self.currentFunction].index:self.index]
-                print("Token Check", [i.value for i in self.tokens[self.functions[self.currentFunction].index:self.index]])
                 self.functionState -= 1
                 self.currentFunction = ""
             elif self.tokens[self.index].value.isidentifier():
@@ -345,7 +344,7 @@ class CodeGen:
         self.sem.index = 0
     
     def generate(self, flags : list) -> None:
-        flagChecks = [self.Flag("cf","cformat"),self.Flag("le","logerrors"),self.Flag("pf","printfunctions"),self.Flag("e","export")]
+        flagChecks = [self.Flag("cf","cformat"),self.Flag("le","logerrors"),self.Flag("pt","printtokens"),self.Flag("e","export"), self.Flag("r", "run")]
         for flag in flags:
             if flag[0] != '-' or len(flag) - flag.count('-') < 1:
                 self.handler.add(errorhandling.Error("generator", "syntax", "unexpected flag at CLI",(0,0),flag))
@@ -357,11 +356,12 @@ class CodeGen:
                 self.cgenrate()
             elif (flag[2:] == flagChecks[2].longname or flag[1:] == flagChecks[2].shortname) and not flagChecks[2].used:
                 flagChecks[2].used = True
-                print("-pf flag")
+                print("-pt flag")
             elif (flag[2:] == flagChecks[3].longname or flag[1:] == flagChecks[3].shortname) and not flagChecks[3].used:
                 flagChecks[3].used = True
                 print("-e flag")
-
+            elif (flag[2:] == flagChecks[4].longname or flag[1:] == flagChecks[4].shortname) and not flagChecks[3].used:
+                print("-r flag")
     def cgenrate(self):
         def guesstype(expression):
             exp = self.sem.checkExpression(expression)

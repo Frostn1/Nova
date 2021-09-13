@@ -1,0 +1,5 @@
+[2:10] { syntax } - missing assignment operator at <> 
+[2:11] { syntax } - unexpected token <> 
+[3:2] { syntax } - unexpected token <> 
+[2:10] { naming } - invalid identifier name <> 
+[2:11] { naming } - invalid identifier name <> 

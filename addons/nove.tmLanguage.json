@@ -1,0 +1,64 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Nova",
+	"patterns": [
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#variables"
+		},
+		{
+			"include": "#comments"
+		},
+		{
+			"include": "#numbers"
+		}
+		
+	],
+	"repository": {
+		"variables": {
+			"patterns": [
+				{
+					"name": "keyword",
+					"match": "\\b(let)\\b"
+				},
+				{
+					"name": "entity",
+					"match": "\\b(fn)\\b"
+				},
+				{
+					"name": "variable",
+					"match": "\\b(return)\\b"
+				}
+			]
+		},
+		"strings": {
+			"name": "string.quoted.double",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.nova",
+					"match": "\\\\."
+				}
+			]
+		},
+		"comments": {
+			"name": "comment",
+			"begin": "\\//",
+			"end": "\n"
+		},
+		"numbers": {
+			"patterns":
+			[
+				{
+					"name" : "constant.numeric",
+					"match" : "\\b(\\d+(?:\\.\\d+)?)\\b"
+				}
+			] 
+		}
+		
+	},
+	"scopeName": "source.nova"
+}
