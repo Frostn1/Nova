@@ -190,7 +190,6 @@ class Semantic:
             self.args = args
             self.tokens = []
             self.index = index
-            # super(type(),self).__init__(name, "0", pos, variables)
     def __init__(self, tokens, handler):
         self.tokens = tokens
         self.variables = {}
@@ -235,20 +234,20 @@ class Semantic:
                 self.handler.add(errorhandling.Error("semantic", "naming", "unmatched variable name", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
                 # print("semantic error : unmatched variable name at",verified[0].pos[0],verified[0].pos[1],"<>",verified[0].value)
                 # exit(1)
-        elif verified[0].type == "bracket":
-            i = 1
-            while i < len(verified) and verified[i].type != "bracket" and verified[i].type != "operator":
-                i += 1
-            if verified[i - 1].type == "identifier":
-                if verified[i - 1].value in self.variables.keys():
-                    lastType = self.variables[verified[i - 1].value].type
-                else:
-                    self.handler.add(errorhandling.Error("semantic", "naming", "unmatched variable name", (verified[i-1].pos[0], verified[i-1].pos[1]), verified[i-1].value))
-                    lastType = "number"
-            else:
-                lastType = verified[i - 1].type
-        else:
-            lastType = verified[0].type
+        # elif verified[0].type == "bracket":
+        #     i = 1
+        #     while i < len(verified) and verified[i].type != "bracket" and verified[i].type != "operator":
+        #         i += 1
+        #     if verified[i - 1].type == "identifier":
+        #         if verified[i - 1].value in self.variables.keys():
+        #             lastType = self.variables[verified[i - 1].value].type
+        #         else:
+        #             self.handler.add(errorhandling.Error("semantic", "naming", "unmatched variable name", (verified[i-1].pos[0], verified[i-1].pos[1]), verified[i-1].value))
+        #             lastType = "number"
+        #     else:
+        #         lastType = verified[i - 1].type
+        # else:
+        #     lastType = verified[0].type
         stringList = []
         for index,ver in enumerate(verified):
             try:
