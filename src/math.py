@@ -112,7 +112,7 @@ class calc:
                 if val == '!':
                     op = operand_stack.pop_()
                     if op.isnumeric():
-                        res = calc.factorial(op)
+                        res = calc.factorial(int(op))
                         operand_stack.push(str(res))
                     else:
                         errorhandler.add(errorhandling.Error(section, "fatal", "variable type doesnt match for factorial", (pos[0], pos[1]), op))
@@ -136,4 +136,4 @@ class calc:
             return int_res
         return res
 
-print(calc.calc_post(convertor.postinfix([i for i in '1+2*(4*3)']), errorhandling.ErrorHandler(), "semantic", (0,0), {}))
+print(calc.calc_post(convertor.postinfix([i for i in '3!+2*(4*3)']), errorhandling.ErrorHandler(), "semantic", (0,0), {}))
