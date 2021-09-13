@@ -1,6 +1,6 @@
 from types import FunctionType
 import errorhandling
-
+from math_ import calc, convertor 
 class Token:
     def __init__(self, _id : int, value : str, line : int, column : int):
         self.id = _id
@@ -220,34 +220,13 @@ class Semantic:
                 verified.append(self.Symbol("bracket",exp, [], (self.tokens[self.index].line, self.tokens[self.index].column)))
             else:
                 self.handler.add(errorhandling.Error("semantic", "symbols", "miss identified symbol", (self.tokens[self.index].line, self.tokens[self.index].column), exp))
-                # print("semantic error : miss identified symbol at", self.tokens[self.index].line, self.tokens[self.index].column,"<>",exp)
-                # exit(1)
         
         if verified[0].type == "operator":
             self.handler.add(errorhandling.Error("semantic", "syntax", "first value can't be an operator", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
-            # print("semantic error : first value can't be an operator at",verified[0].pos[0], verified[0].pos[1])
-            # exit(1)
-        if verified[0].type == "identifier":
-            if verified[0].value in self.variables.keys():
-                lastType = self.variables[verified[0].value].type
-            else:
-                self.handler.add(errorhandling.Error("semantic", "naming", "unmatched variable name", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
-                # print("semantic error : unmatched variable name at",verified[0].pos[0],verified[0].pos[1],"<>",verified[0].value)
-                # exit(1)
-        # elif verified[0].type == "bracket":
-        #     i = 1
-        #     while i < len(verified) and verified[i].type != "bracket" and verified[i].type != "operator":
-        #         i += 1
-        #     if verified[i - 1].type == "identifier":
-        #         if verified[i - 1].value in self.variables.keys():
-        #             lastType = self.variables[verified[i - 1].value].type
-        #         else:
-        #             self.handler.add(errorhandling.Error("semantic", "naming", "unmatched variable name", (verified[i-1].pos[0], verified[i-1].pos[1]), verified[i-1].value))
-        #             lastType = "number"
-        #     else:
-        #         lastType = verified[i - 1].type
-        # else:
-        #     lastType = verified[0].type
+        if verified[0].type == "identifier" and verified[0].value not in self.variables.keys():
+            self.handler.add(errorhandling.Error("semantic", "naming", "unmatched variable name", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
+        return str(calc.calc_post(convertor.postinfix(verified), self.handler, "semantic", verified[0].pos, self.variables))
+        
         stringList = []
         for index,ver in enumerate(verified):
             try:
@@ -400,7 +379,7 @@ class CodeGen:
             for function in functions:
                 function = Semantic.Function(function)
                 filep.write(guesstype(function.value) + ' ')
-                filep.write(function.name + ''
+                filep.write(function.name + '(')
         def newfile(path, includes = []):
             with open(path, 'w') as new:
                 formalIncludes = ['stdio.h','stdlib.h', 'string.h']
