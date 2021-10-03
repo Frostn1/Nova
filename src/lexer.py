@@ -427,18 +427,56 @@ class CodeGen:
             new.write('\treturn 0;\n')
             new.write('}')
     def runCode(self):
-        index = 0
-        while index < len(self.tokens):
-            if self.tokens[index].value == '>':
-                index += 1
+        self.index = 0
+        self.variables = {}
+        while self.index < len(self.tokens):
+            if self.tokens[self.index].value == 'let' or self.tokens[self.index].value == 'link':
+                self.index += 1
+                if self.tokens[self.index].value.isidentifier():
+                    self.index += 1
+                    if self.tokens[self.index].value == '=':
+                        self.index += 1
+                        expression = []
+                        while self.index < len(self.tokens) and self.tokens[self.index].value != ';':
+                            expression.append(self.tokens[self.index].value)
+                            self.index += 1
+                        if len(expression) < 1:
+                            self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[self.index].line,self.tokens[self.index].column)))
+                        finalValue = self.sem.checkExpression(expression)
+                        varName = self.tokens[self.index-len(expression)-2].value
+                        self.variables[varName] = self.sem.Variable(
+                                                    varName, 
+                                                    finalValue, 
+                                                    (self.tokens[self.index-len(expression)-2].line,  self.tokens[self.index-len(expression)-2].column),
+                                                    self.variables)
+
+            elif self.tokens[self.index].value == '>':
+                self.index += 1
                 expression = []
-                while index < len(self.tokens) - 1 and self.tokens[index].value != ';':   
-                    expression.append(self.tokens[index])
-                    index += 1
-                final = str(calc.calc_post(convertor.postinfix([i.value for i in expression]), self.handler, "semantic", (expression[0].line, expression[0].column), self.sem.variables))
-                if final in self.sem.variables.keys():
-                    print(self.sem.variables[final])
+                while self.index < len(self.tokens) - 1 and self.tokens[self.index].value != ';':   
+                    expression.append(self.tokens[self.index])
+                    self.index += 1
+                final = str(calc.calc_post(convertor.postinfix([i.value for i in expression]), self.handler, "semantic", (expression[0].line, expression[0].column), self.variables))
+                if final in self.variables.keys():
+                    print(self.variables[final])
                 else:
                     print(final)
-            index += 1
+            elif self.tokens[self.index].value.isidentifier() and self.tokens[self.index].value in self.variables.keys():
+                self.index += 1
+                if self.tokens[self.index].value == '=':
+                    self.index += 1
+                    expression = []
+                    while self.tokens[self.index].value != ';':
+                        expression.append(self.tokens[self.index].value)
+                        self.index += 1
+                    if len(expression) < 1:
+                        self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[self.index].line,self.tokens[self.index].column)))
+                    finalValue = self.sem.checkExpression(expression)
+                    varName = self.tokens[self.index-len(expression)-2].value
+                    self.variables[varName] = self.sem.Variable(
+                                                varName, 
+                                                finalValue, 
+                                                (self.tokens[self.index-len(expression)-2].line,  self.tokens[self.index-len(expression)-2].column),
+                                                self.variables)
+            self.index += 1
                 
