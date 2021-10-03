@@ -207,7 +207,7 @@ class Semantic:
         self.functionState = 0
         self.currentFunction = ""
 
-    def checkExpression(self, expressionList : list):
+    def checkExpression(self, expressionList : list, variables):
         verified = []
         for index, exp in enumerate(expressionList):
             if exp.isnumeric() or ('.' in exp and exp[exp.index('.')+1:].isnumeric() and exp[:exp.index('.')].isnumeric()):
@@ -223,9 +223,9 @@ class Semantic:
         
         if verified[0].type == "operator":
             self.handler.add(errorhandling.Error("semantic", "syntax", "first value can't be an operator", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
-        if verified[0].type == "identifier" and verified[0].value not in self.variables.keys():
+        if verified[0].type == "identifier" and verified[0].value not in variables.keys():
             self.handler.add(errorhandling.Error("semantic", "naming", "unmatched variable name", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
-        return str(calc.calc_post(convertor.postinfix([i.value for i in verified]), self.handler, "semantic", verified[0].pos, self.variables))
+        return str(calc.calc_post(convertor.postinfix([i.value for i in verified]), self.handler, "semantic", verified[0].pos, variables))
         
         stringList = []
         for index,ver in enumerate(verified):
@@ -260,7 +260,7 @@ class Semantic:
                             self.index += 1
                         if len(expression) < 1:
                             self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[self.index].line,self.tokens[self.index].column)))
-                        finalValue = self.checkExpression(expression)
+                        finalValue = self.checkExpression(expression, self.variables)
                         varName = self.tokens[self.index-len(expression)-2].value
                         self.variables[varName] = self.Variable(
                                                     varName, 
@@ -296,7 +296,7 @@ class Semantic:
                     self.index += 1
                 if len(expression) < 1:
                     self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[self.index].line,self.tokens[self.index].column)))
-                finalValue = self.checkExpression(expression)
+                finalValue = self.checkExpression(expression, self.variables)
                 self.functions[self.currentFunction].value = finalValue
                 self.functions[self.currentFunction].getType(self.variables)
             elif self.tokens[self.index].value == '}' and self.functionState:
@@ -314,7 +314,7 @@ class Semantic:
                         self.index += 1
                     if len(expression) < 1:
                         self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[self.index].line,self.tokens[self.index].column)))
-                    finalValue = self.checkExpression(expression)
+                    finalValue = self.checkExpression(expression, self.variables)
                     varName = self.tokens[self.index-len(expression)-2].value
                     self.variables[varName] = self.Variable(
                                                 varName, 
@@ -365,7 +365,7 @@ class CodeGen:
                 # print("-r flag")
     def cgenrate(self):
         def guesstype(expression):
-            exp = self.sem.checkExpression(expression)
+            exp = self.sem.checkExpression(expression, self.variables)
             if exp.isnumeric() or ('.' in exp and exp[exp.index('.')+1:].isnumeric() and exp[:exp.index('.')].isnumeric() and exp[:exp.index('.')][0] == '0'):
                 return 'int'
             elif ('.' in exp and exp[exp.index('.')+1:].isnumeric() and exp[:exp.index('.')].isnumeric()):
@@ -442,7 +442,7 @@ class CodeGen:
                             self.index += 1
                         if len(expression) < 1:
                             self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[self.index].line,self.tokens[self.index].column)))
-                        finalValue = self.sem.checkExpression(expression)
+                        finalValue = self.sem.checkExpression(expression, self.variables)
                         varName = self.tokens[self.index-len(expression)-2].value
                         self.variables[varName] = self.sem.Variable(
                                                     varName, 
@@ -471,7 +471,7 @@ class CodeGen:
                         self.index += 1
                     if len(expression) < 1:
                         self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[self.index].line,self.tokens[self.index].column)))
-                    finalValue = self.sem.checkExpression(expression)
+                    finalValue = self.sem.checkExpression(expression, self.variables)
                     varName = self.tokens[self.index-len(expression)-2].value
                     self.variables[varName] = self.sem.Variable(
                                                 varName, 
