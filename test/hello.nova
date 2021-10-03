@@ -1,4 +1,3 @@
-fn main(x, y) {
-    return 1;
-}
-
+let x = 1;
+let y = x + 7.2;
+let z = x + y;

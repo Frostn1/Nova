@@ -4,4 +4,7 @@
 
 int main(int argc, char** argv) {
 	int x = 1;
+	float y = x + 7.2;
+	float z = x + y;
+	return 0;
 }

@@ -225,7 +225,7 @@ class Semantic:
             self.handler.add(errorhandling.Error("semantic", "syntax", "first value can't be an operator", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
         if verified[0].type == "identifier" and verified[0].value not in self.variables.keys():
             self.handler.add(errorhandling.Error("semantic", "naming", "unmatched variable name", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
-        return str(calc.calc_post(convertor.postinfix(verified), self.handler, "semantic", verified[0].pos, self.variables))
+        return str(calc.calc_post(convertor.postinfix([i.value for i in verified]), self.handler, "semantic", verified[0].pos, self.variables))
         
         stringList = []
         for index,ver in enumerate(verified):
@@ -423,6 +423,7 @@ class CodeGen:
                     new.write(' ' + self.tokens[index-len(expression) - 1].value)
                     new.write(' ' + ' '.join(expression) + ';\n')
                 index += 1
+            new.write('\treturn 0;\n')
             new.write('}')
             
                 

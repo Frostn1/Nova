@@ -103,7 +103,7 @@ class calc:
             if value.isnumeric() or ('.' in value and value[value.index('.')+1:].isnumeric() and value[:value.index('.')].isnumeric()):
                 return "number"
             elif value.isidentifier():
-                return _vars[value].type
+                return getType(_vars[value].value, _vars)
 
         operand_stack = stack()
 
@@ -119,7 +119,12 @@ class calc:
                 else:
                     op2 = operand_stack.pop_()
                     op1 = operand_stack.pop_()
+                    
                     types = getType(op2, variables), getType(op1, variables)
+                    if op2 in variables.keys():
+                        op2 = variables[op2].value
+                    if op1 in variables.keys():
+                        op1 = variables[op1].value
                     if types[0] == types[1]:
                         if types[0] == 'number':
                             res = calc.calc_(float(op1), val, float(op2))
