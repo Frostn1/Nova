@@ -35,8 +35,9 @@ class convertor:
         changer = stack()
         new_exp = list()
         operator_precedence = {}
-        operator_precedence['!'] = 5
-        operator_precedence['^'] = 4
+        operator_precedence['!'] = 6
+        operator_precedence['^'] = 5
+        operator_precedence['..'] = 4
         operator_precedence['/'] = 3
         operator_precedence['*'] = 3
         operator_precedence['+'] = 2
@@ -93,8 +94,14 @@ class calc:
             return op1 * op2
         elif op == '/':
             return op1 / op2
+        elif op == '..':
+            if isinstance(op1,float) and isinstance(op2, float) and int(op1) != op1 and int(op2) != op2:
+                return op1 + op2
+            else:
+                return float(str(int(op1)) + str(int(op2)))
         elif op == '^':
             return op1 ** op2
+        
 
     @staticmethod
     def calc_post(postfix_list, errorhandler, section, pos, variables):
@@ -108,7 +115,7 @@ class calc:
         operand_stack = stack()
 
         for val in postfix_list:
-            if val in '+-*/^!':
+            if val in ['+','-','*','/', '..']:
                 if val == '!':
                     op = operand_stack.pop_()
                     if op.isnumeric():
@@ -135,6 +142,8 @@ class calc:
                         errorhandler.add(errorhandling.Error(section, "fatal", "variable type missmatch", (pos[0], pos[1]), op1 + ' ' + op2))
             else:
                 operand_stack.push(val)
+        if operand_stack.content[-1].isidentifier():
+            operand_stack.content[-1] = variables[operand_stack.content[-1]].value
         res = float(operand_stack.content[-1])
         int_res = int(res)
         if int_res == res:

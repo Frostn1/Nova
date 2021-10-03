@@ -2,6 +2,8 @@ import sys
 import lexer
 
 def main(argv : list):
+    print(argv)
+    argv = ['src\\main.py', 'test\\hello.nova', '-r']
     if len(argv) < 2:
         raise Exception("file error : missing file")
     if argv[1] == "" :

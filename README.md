@@ -3,7 +3,7 @@
 ## Flags
 - -cf --cformat compiles file to c
 - -le --logerrors logs errors to file
-- [WIP] -pf --printfunctions writes all file functions to log file 
+- [WIP] -r --run inside a sandbox enviorment
 - [WIP] -e --export exports functions to outer use
 
 

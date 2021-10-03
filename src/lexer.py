@@ -19,7 +19,7 @@ class Lexer:
 
         self.symbols = ['{', '}', '(', ')', '[', ']', '"', '*', '\n', ':', ',',';'] # single-char keywords
         self.other_symbols = ['\\', '/*', '*/'] # multi-char keywords
-        self.arthemic = ['=','+','-','*','/']
+        self.arthemic = ['=','+','-','*','/', '..']
         self.KEYWORDS = self.symbols + self.other_symbols + self.arthemic
 
         #-------------------------------
@@ -198,7 +198,7 @@ class Semantic:
 
         #-------------------------------------------------
 
-        self.validOperators = [i for i in '+-*/']
+        self.validOperators = ['+','-','*','/', '..']
         self.brackets = [i for i in '()']
 
         #-------------------------------------------------
@@ -214,7 +214,7 @@ class Semantic:
                 verified.append(self.Symbol("number", exp, [], (self.tokens[self.index].line, self.tokens[self.index].column)))
             elif exp.isidentifier():
                 verified.append(self.Symbol("identifier",exp, [], (self.tokens[self.index].line, self.tokens[self.index].column)))
-            elif len(exp) == 1 and exp in self.validOperators:
+            elif exp in self.validOperators:
                 verified.append(self.Symbol("operator",exp, [expressionList[index + 1], expressionList[index - 1]], (self.tokens[self.index].line, self.tokens[self.index].column)))
             elif len(exp) == 1 and exp in self.brackets:
                 verified.append(self.Symbol("bracket",exp, [], (self.tokens[self.index].line, self.tokens[self.index].column)))
@@ -260,7 +260,6 @@ class Semantic:
                             self.index += 1
                         if len(expression) < 1:
                             self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[self.index].line,self.tokens[self.index].column)))
-
                         finalValue = self.checkExpression(expression)
                         varName = self.tokens[self.index-len(expression)-2].value
                         self.variables[varName] = self.Variable(
@@ -305,7 +304,7 @@ class Semantic:
                 self.functions[self.currentFunction].tokens = self.tokens[self.functions[self.currentFunction].index:self.index]
                 self.functionState -= 1
                 self.currentFunction = ""
-            elif self.tokens[self.index].value.isidentifier():
+            elif self.tokens[self.index].value.isidentifier() and self.tokens[self.index].value in self.variables.keys():
                 self.index += 1
                 if self.tokens[self.index].value == '=':
                     self.index += 1
@@ -360,8 +359,10 @@ class CodeGen:
             elif (flag[2:] == flagChecks[3].longname or flag[1:] == flagChecks[3].shortname) and not flagChecks[3].used:
                 flagChecks[3].used = True
                 print("-e flag")
-            elif (flag[2:] == flagChecks[4].longname or flag[1:] == flagChecks[4].shortname) and not flagChecks[3].used:
-                print("-r flag")
+            elif (flag[2:] == flagChecks[4].longname or flag[1:] == flagChecks[4].shortname) and not flagChecks[4].used:
+                flagChecks[4].used = True
+                self.runCode()
+                # print("-r flag")
     def cgenrate(self):
         def guesstype(expression):
             exp = self.sem.checkExpression(expression)
@@ -425,5 +426,19 @@ class CodeGen:
                 index += 1
             new.write('\treturn 0;\n')
             new.write('}')
-            
+    def runCode(self):
+        index = 0
+        while index < len(self.tokens):
+            if self.tokens[index].value == '>':
+                index += 1
+                expression = []
+                while index < len(self.tokens) - 1 and self.tokens[index].value != ';':   
+                    expression.append(self.tokens[index])
+                    index += 1
+                final = str(calc.calc_post(convertor.postinfix([i.value for i in expression]), self.handler, "semantic", (expression[0].line, expression[0].column), self.sem.variables))
+                if final in self.sem.variables.keys():
+                    print(self.sem.variables[final])
+                else:
+                    print(final)
+            index += 1
                 
