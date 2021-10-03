@@ -115,7 +115,7 @@ class calc:
         operand_stack = stack()
 
         for val in postfix_list:
-            if val in ['+','-','*','/', '..']:
+            if val in ['+','-','*','/', '..', '!']:
                 if val == '!':
                     op = operand_stack.pop_()
                     if op.isnumeric():

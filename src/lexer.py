@@ -19,7 +19,7 @@ class Lexer:
 
         self.symbols = ['{', '}', '(', ')', '[', ']', '"', '*', '\n', ':', ',',';'] # single-char keywords
         self.other_symbols = ['\\', '/*', '*/'] # multi-char keywords
-        self.arthemic = ['=','+','-','*','/', '..']
+        self.arthemic = ['=','+','-','*','/', '..', '!']
         self.KEYWORDS = self.symbols + self.other_symbols + self.arthemic
 
         #-------------------------------
@@ -198,7 +198,7 @@ class Semantic:
 
         #-------------------------------------------------
 
-        self.validOperators = ['+','-','*','/', '..']
+        self.validOperators = ['+','-','*','/', '..', '!']
         self.brackets = [i for i in '()']
 
         #-------------------------------------------------
