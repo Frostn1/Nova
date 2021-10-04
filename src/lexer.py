@@ -362,7 +362,7 @@ class CodeGen:
             elif (flag[2:] == flagChecks[4].longname or flag[1:] == flagChecks[4].shortname) and not flagChecks[4].used:
                 flagChecks[4].used = True
                 self.runCode()
-                # print("-r flag")
+                print("-r flag")
     def cgenrate(self):
         def guesstype(expression):
             exp = self.sem.checkExpression(expression, self.variables)
