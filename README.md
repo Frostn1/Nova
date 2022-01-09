@@ -1,5 +1,6 @@
 # Nova
-
+The Nova Programming Language.<br>
+Takes Nova code and either runs it using the compiler, or translates it into c code
 ## Flags
 - -cf --cformat compiles file to c
 - -le --logerrors logs errors to file
@@ -7,7 +8,7 @@
 - [WIP] -e --export exports functions for outer use
 
 
-## TODO
+## TODO/Milestones
 ### Current
 - [x] Concat operator
 - [x] Runtime executing
