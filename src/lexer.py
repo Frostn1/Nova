@@ -17,7 +17,7 @@ class Lexer:
         self.handler = errorhandling.ErrorHandler()
         #-------------------------------
 
-        self.symbols = ['{', '}', '(', ')', '[', ']', '"', '*', '\n', ':', ',',';'] # single-char keywords
+        self.symbols = ['{', '}', '(', ')', '[', ']', '"', '*', '\n', ':', ',',';', '>'] # single-char keywords
         self.other_symbols = ['\\', '/*', '*/'] # multi-char keywords
         self.arthemic = ['=','+','-','*','/', '..', '!']
         self.KEYWORDS = self.symbols + self.other_symbols + self.arthemic
@@ -124,6 +124,7 @@ class Parser:
                         
                 else:
                     self.handler.add(errorhandling.Error("parser", "naming", "invalid identifier name", (self.tokens[index].line,self.tokens[index].column)))
+            
             elif self.tokens[index].value == 'fn':
                 index += 1
                 if self.tokens[index].value.isidentifier():
@@ -145,7 +146,8 @@ class Parser:
                             self.functionState += 1
             elif self.tokens[index].value == '}' and not self.functionState:
                 self.handler.add(errorhandling.Error("parser", "syntax", "unexpected char", (self.tokens[index].line,self.tokens[index].column)), "}")
-            elif self.tokens[index].value.isidentifier():
+            
+            elif self.tokens[index].value.isidentifier() and self.tokens[index+1].value != '(':
                 index += 1
                 if self.tokens[index].value == '=':
                     index += 1
@@ -154,12 +156,21 @@ class Parser:
                         expression.append(self.tokens[index].value)
                         index += 1
                     if len(expression) < 1:
-                        self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[index].line,self.tokens[index].column)))
+                        self.handler.add(errorhandling.Error("parser", "syntax", f"missing expression `{self.tokens[index].value}`", (self.tokens[index].line,self.tokens[index].column)))
                 else :
-                        self.handler.add(errorhandling.Error("parser", "syntax", "missing assignment operator at", (self.tokens[index].line,self.tokens[index].column)))
-                        
+                        self.handler.add(errorhandling.Error("parser", "syntax", "missing assignment operator at", (self.tokens[index].line,self.tokens[index].column)))   
+            elif self.tokens[index].value == '>':
+                # Printing out to screen
+                index += 1
+                expression = []
+                while index < len(self.tokens) and self.tokens[index].value != ';':
+                    expression.append(self.tokens[index].value)
+                    index += 1
+                if len(expression) < 1:
+                    self.handler.add(errorhandling.Error("parser", "syntax", f"missing expression `{self.tokens[index].value}`", (self.tokens[index].line,self.tokens[index].column)))
+            
             else:
-                self.handler.add(errorhandling.Error("parser", "syntax", "unexpected token", (self.tokens[index].line,self.tokens[index].column)))
+                self.handler.add(errorhandling.Error("parser", "syntax", f"unexpected token `{self.tokens[index].value}`", (self.tokens[index].line,self.tokens[index].column)))
                 
             index += 1
 
@@ -226,25 +237,6 @@ class Semantic:
         if verified[0].type == "identifier" and verified[0].value not in variables.keys():
             self.handler.add(errorhandling.Error("semantic", "naming", "unmatched variable name", (verified[0].pos[0], verified[0].pos[1]), verified[0].value))
         return str(calc.calc_post(convertor.postinfix([i.value for i in verified]), self.handler, "semantic", verified[0].pos, variables))
-        
-        stringList = []
-        for index,ver in enumerate(verified):
-            try:
-                if ver.type != "identifier" and ver.type != lastType and ver.type != "operator" and ver.type != "bracket":
-                    self.handler.add(errorhandling.Error("semantic", "types", "missmatch type", (ver.pos[0], ver.pos[1]), ver.value))
-                elif ver.type == "identifier" and (ver.value in self.variables.keys() and self.variables[ver.value].type != lastType):
-                    self.handler.add(errorhandling.Error("semantic", "types", "mismatch type", (ver.pos[0], ver.pos[1]), ver.value))
-                elif ver.type == "identifier" and ver.value not in self.variables.keys():
-                    self.handler.add(errorhandling.Error("semantic", "bounds", "variables used before assignment", (ver.pos[0], ver.pos[1]), ver.value))
-                elif ver.type == "identifier":
-                    stringList.append(self.variables[ver.value].value)
-                else:
-                    stringList.append(ver.value)
-            except UnboundLocalError as e:
-                self.handler.add(errorhandling.Error("semantic", "fatal", "variables used before assignment", (ver.pos[0], ver.pos[1]), ver.value))
-                raise EOFError()
-        final = eval("".join(stringList))
-        return str(final)
 
     def analyse(self):
         while self.index < len(self.tokens):
@@ -304,7 +296,7 @@ class Semantic:
                 self.functions[self.currentFunction].tokens = self.tokens[self.functions[self.currentFunction].index:self.index]
                 self.functionState -= 1
                 self.currentFunction = ""
-            elif self.tokens[self.index].value.isidentifier() and self.tokens[self.index].value in self.variables.keys():
+            elif self.tokens[self.index].value.isidentifier() and self.tokens[self.index + 1].value != '(' and self.tokens[self.index].value in self.variables.keys():
                 self.index += 1
                 if self.tokens[self.index].value == '=':
                     self.index += 1
@@ -323,7 +315,16 @@ class Semantic:
                                                 self.variables)
                 else :
                         self.handler.add(errorhandling.Error("parser", "syntax", "missing assignment operator at", (self.tokens[self.index].line,self.tokens[self.index].column)))
-                        
+            elif self.tokens[self.index].value == '>':
+                self.index += 1
+                expression = []
+                while self.tokens[self.index].value != ';':
+                    expression.append(self.tokens[self.index].value)
+                    self.index += 1
+                if len(expression) < 1:
+                    self.handler.add(errorhandling.Error("parser", "syntax", "missing expression", (self.tokens[self.index].line,self.tokens[self.index].column)))
+                finalValue = self.checkExpression(expression, self.variables)
+                # DEBUG `finalValue`    
             else:
                 self.handler.add(errorhandling.Error("parser", "naming", "invalid identifier name", (self.tokens[self.index].line,self.tokens[self.index].column)))
             self.index += 1
@@ -355,14 +356,14 @@ class CodeGen:
                 self.cgenrate()
             elif (flag[2:] == flagChecks[2].longname or flag[1:] == flagChecks[2].shortname) and not flagChecks[2].used:
                 flagChecks[2].used = True
-                print("-pt flag")
+                # print("-pt flag")
             elif (flag[2:] == flagChecks[3].longname or flag[1:] == flagChecks[3].shortname) and not flagChecks[3].used:
                 flagChecks[3].used = True
-                print("-e flag")
+                # print("-e flag")
             elif (flag[2:] == flagChecks[4].longname or flag[1:] == flagChecks[4].shortname) and not flagChecks[4].used:
                 flagChecks[4].used = True
                 self.runCode()
-                print("-r flag")
+                # print("-r flag")
     def cgenrate(self):
         def guesstype(expression):
             exp = self.sem.checkExpression(expression, self.variables)
@@ -426,6 +427,7 @@ class CodeGen:
                 index += 1
             new.write('\treturn 0;\n')
             new.write('}')
+    
     def runCode(self):
         self.index = 0
         self.variables = {}
