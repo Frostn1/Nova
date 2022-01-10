@@ -37,8 +37,8 @@ def main(argv : list):
         while src != 'hlt':
             src = input("=> ")
             if src != 'hlt':
+                # WIP:
                 runCode(src, variables_)
-        # raise Exception("file error : missing file")
     else:
         if argv[1] == "" :
             raise Exception("file error : file path empty")

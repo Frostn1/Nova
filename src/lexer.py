@@ -17,7 +17,7 @@ class Lexer:
         self.handler = errorhandling.ErrorHandler()
         #-------------------------------
 
-        self.symbols = ['{', '}', '(', ')', '[', ']', '"', '*', '\n', ':', ',',';'] # single-char keywords
+        self.symbols = ['{', '}', '(', ')', '[', ']', '"', '*', '\n', ':', ',',';', '>'] # single-char keywords
         self.other_symbols = ['\\', '/*', '*/'] # multi-char keywords
         self.arthemic = ['=','+','-','*','/', '..', '!']
         self.KEYWORDS = self.symbols + self.other_symbols + self.arthemic
