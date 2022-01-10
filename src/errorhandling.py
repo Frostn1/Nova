@@ -17,12 +17,14 @@ class ErrorHandler:
     def __init__(self) -> None:
         self.errorList = []
 
-    def write(self, outfile = "log.txt"):
+    def write(self, outfile = "errors.txt"):
+        print('Hello error')
         with open(outfile, 'w') as filep:
             if not filep.writable():
                 print("output file not writeable")
                 exit(1)
             for error in self.errorList:
+                print(error)
                 filep.write(str(error))
     def add(self, error : Error):
         self.errorList.append(error)
